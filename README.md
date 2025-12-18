@@ -115,7 +115,33 @@ apt-repo/
 │   │           ├── Packages     # Package index (arm64)
 │   │           ├── Packages.gz  # Compressed index
 │   │           └── index.html   # Directory listing
-│   └── noble/                    # Ubuntu 24.04 LTS
+│   ├── noble/                    # Ubuntu 24.04 LTS
+│   │   ├── Release               # Repository metadata
+│   │   ├── Release.gpg          # GPG signature
+│   │   ├── InRelease            # Signed Release file
+│   │   └── main/
+│   │       ├── binary-amd64/
+│   │       │   ├── Packages     # Package index (amd64)
+│   │       │   ├── Packages.gz  # Compressed index
+│   │       │   └── index.html   # Directory listing
+│   │       └── binary-arm64/
+│   │           ├── Packages     # Package index (arm64)
+│   │           ├── Packages.gz  # Compressed index
+│   │           └── index.html   # Directory listing
+│   ├── bookworm/                 # Debian 12
+│   │   ├── Release               # Repository metadata
+│   │   ├── Release.gpg          # GPG signature
+│   │   ├── InRelease            # Signed Release file
+│   │   └── main/
+│   │       ├── binary-amd64/
+│   │       │   ├── Packages     # Package index (amd64)
+│   │       │   ├── Packages.gz  # Compressed index
+│   │       │   └── index.html   # Directory listing
+│   │       └── binary-arm64/
+│   │           ├── Packages     # Package index (arm64)
+│   │           ├── Packages.gz  # Compressed index
+│   │           └── index.html   # Directory listing
+│   └── trixie/                   # Debian 13
 │       ├── Release               # Repository metadata
 │       ├── Release.gpg          # GPG signature
 │       ├── InRelease            # Signed Release file

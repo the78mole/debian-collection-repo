@@ -14,7 +14,7 @@ fi
 cd "$APT_REPO"
 
 # Define supported distributions and architectures
-DISTRIBUTIONS="jammy noble"  # Ubuntu 22.04, 24.04
+DISTRIBUTIONS="jammy noble bookworm trixie"  # Ubuntu 22.04, 24.04, Debian 12, 13
 ARCHITECTURES="amd64 arm64"
 
 echo "Generating repository for distributions: $DISTRIBUTIONS"
@@ -61,6 +61,12 @@ for dist in $DISTRIBUTIONS; do
             ;;
         noble)
             dist_name="Ubuntu 24.04 LTS (Noble Numbat)"
+            ;;
+        bookworm)
+            dist_name="Debian 12 (Bookworm)"
+            ;;
+        trixie)
+            dist_name="Debian 13 (Trixie)"
             ;;
         *)
             dist_name="$dist"

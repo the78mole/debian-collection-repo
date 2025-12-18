@@ -126,8 +126,8 @@
                 <div class="stat-label">Available Packages</div>
             </div>
             <div class="stat-box">
-                <div class="stat-number">2</div>
-                <div class="stat-label">Ubuntu Releases</div>
+                <div class="stat-number">4</div>
+                <div class="stat-label">Distributions</div>
             </div>
             <div class="stat-box">
                 <div class="stat-number">amd64, arm64</div>
@@ -142,28 +142,42 @@
         <pre>curl -fsSL {{ pages_url }}/public.key | sudo gpg --dearmor -o /usr/share/keyrings/{{ repo_name }}.gpg</pre>
 
         <h3>2. Add Repository</h3>
-        <p>Choose the command for your Ubuntu version and architecture:</p>
+        <p>Choose the command for your distribution version and architecture:</p>
         
-        <p><strong>Ubuntu 22.04 (Jammy)</strong> - amd64:</p>
+        <h4>Ubuntu 22.04 (Jammy)</h4>
+        <p><strong>amd64:</strong></p>
         <pre>echo "deb [arch=amd64 signed-by=/usr/share/keyrings/{{ repo_name }}.gpg] {{ pages_url }} jammy main" | sudo tee /etc/apt/sources.list.d/{{ repo_name }}.list</pre>
-        
-        <p><strong>Ubuntu 22.04 (Jammy)</strong> - arm64:</p>
+        <p><strong>arm64:</strong></p>
         <pre>echo "deb [arch=arm64 signed-by=/usr/share/keyrings/{{ repo_name }}.gpg] {{ pages_url }} jammy main" | sudo tee /etc/apt/sources.list.d/{{ repo_name }}.list</pre>
         
-        <p><strong>Ubuntu 24.04 (Noble)</strong> - amd64:</p>
+        <h4>Ubuntu 24.04 (Noble)</h4>
+        <p><strong>amd64:</strong></p>
         <pre>echo "deb [arch=amd64 signed-by=/usr/share/keyrings/{{ repo_name }}.gpg] {{ pages_url }} noble main" | sudo tee /etc/apt/sources.list.d/{{ repo_name }}.list</pre>
-        
-        <p><strong>Ubuntu 24.04 (Noble)</strong> - arm64:</p>
+        <p><strong>arm64:</strong></p>
         <pre>echo "deb [arch=arm64 signed-by=/usr/share/keyrings/{{ repo_name }}.gpg] {{ pages_url }} noble main" | sudo tee /etc/apt/sources.list.d/{{ repo_name }}.list</pre>
+        
+        <h4>Debian 12 (Bookworm)</h4>
+        <p><strong>amd64:</strong></p>
+        <pre>echo "deb [arch=amd64 signed-by=/usr/share/keyrings/{{ repo_name }}.gpg] {{ pages_url }} bookworm main" | sudo tee /etc/apt/sources.list.d/{{ repo_name }}.list</pre>
+        <p><strong>arm64:</strong></p>
+        <pre>echo "deb [arch=arm64 signed-by=/usr/share/keyrings/{{ repo_name }}.gpg] {{ pages_url }} bookworm main" | sudo tee /etc/apt/sources.list.d/{{ repo_name }}.list</pre>
+        
+        <h4>Debian 13 (Trixie)</h4>
+        <p><strong>amd64:</strong></p>
+        <pre>echo "deb [arch=amd64 signed-by=/usr/share/keyrings/{{ repo_name }}.gpg] {{ pages_url }} trixie main" | sudo tee /etc/apt/sources.list.d/{{ repo_name }}.list</pre>
+        <p><strong>arm64:</strong></p>
+        <pre>echo "deb [arch=arm64 signed-by=/usr/share/keyrings/{{ repo_name }}.gpg] {{ pages_url }} trixie main" | sudo tee /etc/apt/sources.list.d/{{ repo_name }}.list</pre>
 
         <h3>3. Update and Install</h3>
         <pre>sudo apt update
 sudo apt install &lt;package-name&gt;</pre>
 
         <div class="info-box">
-            <strong>💡 Tip:</strong> To see all available packages, use <code>apt search ''</code> after adding the repository, or browse the Packages file for your Ubuntu version and architecture:
+            <strong>💡 Tip:</strong> To see all available packages, use <code>apt search ''</code> after adding the repository, or browse the Packages file for your distribution and architecture:
             <br><strong>Ubuntu 22.04:</strong> <a href="dists/jammy/main/binary-amd64/Packages">amd64</a> | <a href="dists/jammy/main/binary-arm64/Packages">arm64</a>
             <br><strong>Ubuntu 24.04:</strong> <a href="dists/noble/main/binary-amd64/Packages">amd64</a> | <a href="dists/noble/main/binary-arm64/Packages">arm64</a>
+            <br><strong>Debian 12:</strong> <a href="dists/bookworm/main/binary-amd64/Packages">amd64</a> | <a href="dists/bookworm/main/binary-arm64/Packages">arm64</a>
+            <br><strong>Debian 13:</strong> <a href="dists/trixie/main/binary-amd64/Packages">amd64</a> | <a href="dists/trixie/main/binary-arm64/Packages">arm64</a>
         </div>
 
         <h2>📂 Repository Structure</h2>
@@ -182,6 +196,18 @@ sudo apt install &lt;package-name&gt;</pre>
                 <li><a href="dists/noble/main/binary-amd64/Packages">Packages (amd64)</a> | <a href="dists/noble/main/binary-arm64/Packages">Packages (arm64)</a></li>
                 <li><a href="dists/noble/Release">Release</a> - Release metadata</li>
             </ul>
+            <li><strong>Debian 12 (Bookworm):</strong></li>
+            <ul>
+                <li><a href="dists/bookworm/">dists/bookworm/</a> - Distribution metadata</li>
+                <li><a href="dists/bookworm/main/binary-amd64/Packages">Packages (amd64)</a> | <a href="dists/bookworm/main/binary-arm64/Packages">Packages (arm64)</a></li>
+                <li><a href="dists/bookworm/Release">Release</a> - Release metadata</li>
+            </ul>
+            <li><strong>Debian 13 (Trixie):</strong></li>
+            <ul>
+                <li><a href="dists/trixie/">dists/trixie/</a> - Distribution metadata</li>
+                <li><a href="dists/trixie/main/binary-amd64/Packages">Packages (amd64)</a> | <a href="dists/trixie/main/binary-arm64/Packages">Packages (arm64)</a></li>
+                <li><a href="dists/trixie/Release">Release</a> - Release metadata</li>
+            </ul>
             <li><a href="public.key">public.key</a> - GPG public key</li>
         </ul>
 
@@ -191,13 +217,15 @@ sudo apt install &lt;package-name&gt;</pre>
             <li><a href="public.key">Download the public key</a></li>
             <li>Verify the Release file signature manually:
                 <pre>curl -fsSL {{ pages_url }}/public.key | gpg --import
-gpg --verify dists/jammy/InRelease   # For Ubuntu 22.04
-gpg --verify dists/noble/InRelease   # For Ubuntu 24.04</pre>
+gpg --verify dists/jammy/InRelease      # For Ubuntu 22.04
+gpg --verify dists/noble/InRelease      # For Ubuntu 24.04
+gpg --verify dists/bookworm/InRelease   # For Debian 12
+gpg --verify dists/trixie/InRelease     # For Debian 13</pre>
             </li>
         </ul>
 
         <h2>📋 Package Listing</h2>
-        <p>View available packages by Ubuntu version and architecture:</p>
+        <p>View available packages by distribution and architecture:</p>
         <ul>
             <li><strong>Ubuntu 22.04 (Jammy):</strong>
                 <ul>
@@ -209,6 +237,18 @@ gpg --verify dists/noble/InRelease   # For Ubuntu 24.04</pre>
                 <ul>
                     <li>amd64: <a href="dists/noble/main/binary-amd64/Packages">Packages</a> | <a href="dists/noble/main/binary-amd64/Packages.gz">Packages.gz</a></li>
                     <li>arm64: <a href="dists/noble/main/binary-arm64/Packages">Packages</a> | <a href="dists/noble/main/binary-arm64/Packages.gz">Packages.gz</a></li>
+                </ul>
+            </li>
+            <li><strong>Debian 12 (Bookworm):</strong>
+                <ul>
+                    <li>amd64: <a href="dists/bookworm/main/binary-amd64/Packages">Packages</a> | <a href="dists/bookworm/main/binary-amd64/Packages.gz">Packages.gz</a></li>
+                    <li>arm64: <a href="dists/bookworm/main/binary-arm64/Packages">Packages</a> | <a href="dists/bookworm/main/binary-arm64/Packages.gz">Packages.gz</a></li>
+                </ul>
+            </li>
+            <li><strong>Debian 13 (Trixie):</strong>
+                <ul>
+                    <li>amd64: <a href="dists/trixie/main/binary-amd64/Packages">Packages</a> | <a href="dists/trixie/main/binary-amd64/Packages.gz">Packages.gz</a></li>
+                    <li>arm64: <a href="dists/trixie/main/binary-arm64/Packages">Packages</a> | <a href="dists/trixie/main/binary-arm64/Packages.gz">Packages.gz</a></li>
                 </ul>
             </li>
         </ul>

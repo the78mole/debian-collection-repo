@@ -32,8 +32,8 @@ jobs:
 
       - name: Setup directories
         run: |
-          # Define supported Ubuntu distributions
-          DISTRIBUTIONS="jammy noble"  # Ubuntu 22.04, 24.04
+          # Define supported distributions (Ubuntu + Debian)
+          DISTRIBUTIONS="jammy noble bookworm trixie"  # Ubuntu 22.04, 24.04, Debian 12, 13
           ARCHITECTURES="amd64 arm64"
           
           mkdir -p apt-repo/pool/main

@@ -17,7 +17,7 @@ if [ -z "$GPG_KEY_ID" ]; then
 fi
 
 # Define supported distributions
-DISTRIBUTIONS="jammy noble"
+DISTRIBUTIONS="jammy noble bookworm trixie"
 
 echo "Signing Release files with GPG key $GPG_KEY_ID..."
 
