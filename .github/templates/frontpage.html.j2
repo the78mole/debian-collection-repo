@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ repo_name }} - APT Repository</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            line-height: 1.6;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            border-bottom: 3px solid #0066cc;
+            padding-bottom: 10px;
+        }
+        h2 {
+            color: #0066cc;
+            margin-top: 30px;
+        }
+        h3 {
+            color: #555;
+            margin-top: 20px;
+        }
+        pre {
+            background-color: #f4f4f4;
+            padding: 15px;
+            border-radius: 5px;
+            border-left: 4px solid #0066cc;
+            overflow-x: auto;
+        }
+        code {
+            background-color: #f4f4f4;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: "Courier New", monospace;
+        }
+        .info-box {
+            background-color: #e7f3ff;
+            border-left: 4px solid #0066cc;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+        .stats {
+            display: flex;
+            gap: 20px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+        .stat-box {
+            background-color: #f8f9fa;
+            padding: 15px 20px;
+            border-radius: 6px;
+            border: 1px solid #dee2e6;
+            flex: 1;
+            min-width: 200px;
+        }
+        .stat-number {
+            font-size: 32px;
+            font-weight: bold;
+            color: #0066cc;
+        }
+        .stat-label {
+            color: #666;
+            font-size: 14px;
+        }
+        ul {
+            line-height: 2;
+        }
+        a {
+            color: #0066cc;
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+        .warning {
+            background-color: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+        .footer {
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #dee2e6;
+            text-align: center;
+            color: #666;
+            font-size: 14px;
+        }
+        .browse-link {
+            display: inline-block;
+            margin-top: 10px;
+            padding: 8px 16px;
+            background-color: #0066cc;
+            color: white;
+            border-radius: 4px;
+            text-decoration: none;
+        }
+        .browse-link:hover {
+            background-color: #0052a3;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>{{ repo_name }}</h1>
+        <p>Automated Debian package repository collecting packages from multiple GitHub repositories.</p>
+        
+        <div class="stats">
+            <div class="stat-box">
+                <div class="stat-number">{{ package_count }}</div>
+                <div class="stat-label">Available Packages</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-number">1</div>
+                <div class="stat-label">Distribution (stable)</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-number">amd64</div>
+                <div class="stat-label">Architecture</div>
+            </div>
+        </div>
+
+        <h2>📦 Quick Setup</h2>
+        <p>Add this repository to your Debian or Ubuntu system in three easy steps:</p>
+
+        <h3>1. Add GPG Key</h3>
+        <pre>curl -fsSL {{ pages_url }}/public.key | sudo gpg --dearmor -o /usr/share/keyrings/{{ repo_name }}.gpg</pre>
+
+        <h3>2. Add Repository</h3>
+        <pre>echo "deb [arch=amd64 signed-by=/usr/share/keyrings/{{ repo_name }}.gpg] {{ pages_url }} stable main" | sudo tee /etc/apt/sources.list.d/{{ repo_name }}.list</pre>
+
+        <h3>3. Update and Install</h3>
+        <pre>sudo apt update
+sudo apt install &lt;package-name&gt;</pre>
+
+        <div class="info-box">
+            <strong>💡 Tip:</strong> To see all available packages, use <code>apt search ''</code> after adding the repository, or browse the <a href="dists/stable/main/binary-amd64/Packages">Packages</a> file.
+        </div>
+
+        <h2>📂 Repository Structure</h2>
+        <p>Browse the repository contents:</p>
+        <ul>
+            <li><a href="pool/main/">pool/main/</a> - Package pool (all .deb files)</li>
+            <li><a href="dists/stable/">dists/stable/</a> - Distribution metadata</li>
+            <li><a href="dists/stable/main/binary-amd64/Packages">Packages</a> - Package index</li>
+            <li><a href="dists/stable/Release">Release</a> - Release metadata</li>
+            <li><a href="public.key">public.key</a> - GPG public key</li>
+        </ul>
+
+        <h2>🔐 GPG Key Information</h2>
+        <p>This repository is signed with a GPG key for security. You can:</p>
+        <ul>
+            <li><a href="public.key">Download the public key</a></li>
+            <li>Verify the Release file signature manually:
+                <pre>curl -fsSL {{ pages_url }}/public.key | gpg --import
+gpg --verify dists/stable/InRelease</pre>
+            </li>
+        </ul>
+
+        <h2>📋 Package Listing</h2>
+        <p>View available packages:</p>
+        <ul>
+            <li><a href="dists/stable/main/binary-amd64/Packages">Packages (uncompressed)</a> - Human-readable package list</li>
+            <li><a href="dists/stable/main/binary-amd64/Packages.gz">Packages.gz</a> - Compressed package list</li>
+        </ul>
+        <a href="pool/main/" class="browse-link">Browse Package Pool →</a>
+
+        <h2>🔄 Updates</h2>
+        <p>This repository is automatically updated:</p>
+        <ul>
+            <li><strong>Daily:</strong> Checks for new releases at 2:00 AM UTC</li>
+            <li><strong>On-demand:</strong> When source repositories publish new releases</li>
+        </ul>
+
+        <h2>❓ Troubleshooting</h2>
+        <h3>Repository not found</h3>
+        <p>Make sure you've added the GPG key and the repository sources correctly. Check for typos in the commands above.</p>
+
+        <h3>GPG errors</h3>
+        <p>If you see GPG signature warnings, ensure you've imported the public key correctly:</p>
+        <pre>sudo rm /usr/share/keyrings/{{ repo_name }}.gpg
+curl -fsSL {{ pages_url }}/public.key | sudo gpg --dearmor -o /usr/share/keyrings/{{ repo_name }}.gpg
+sudo apt update</pre>
+
+        <h3>Package not found</h3>
+        <p>Check the <a href="dists/stable/main/binary-amd64/Packages">Packages</a> file to see all available packages. Make sure you've run <code>sudo apt update</code> after adding the repository.</p>
+
+        <h2>ℹ️ About</h2>
+        <p>This APT repository automatically collects and publishes Debian packages from multiple GitHub repositories. It's built using GitHub Actions and hosted on GitHub Pages.</p>
+        <ul>
+            <li>Repository: <a href="https://github.com/{{ repo_owner }}/{{ repo_name }}">github.com/{{ repo_owner }}/{{ repo_name }}</a></li>
+            <li>Powered by: GitHub Actions + GitHub Pages</li>
+        </ul>
+
+        <div class="footer">
+            Generated on {{ generated_date }}<br>
+            Last updated: Check <a href="dists/stable/Release">Release</a> file for timestamp
+        </div>
+    </div>
+</body>
+</html>

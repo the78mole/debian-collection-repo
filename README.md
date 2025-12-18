@@ -132,6 +132,17 @@ The workflow is modular and uses separate scripts for maintainability:
 - **`sign-release.sh`** - Signs Release file with GPG key
 - **`generate-frontpage.sh`** - Creates enhanced HTML front page with usage info
 - **`generate-indexes.sh`** - Generates directory index files for all folders
+- **`render-frontpage.py`** - Python script to render front page from Jinja template
+- **`render-indexes.py`** - Python script to render directory indexes from Jinja template
+
+### Templates (`.github/templates/`)
+
+HTML generation uses Jinja2 templates for better maintainability and separation of concerns:
+
+- **`frontpage.html.j2`** - Template for the repository homepage
+- **`directory-index.html.j2`** - Template for directory listings
+
+Templates accept dynamic inputs like repository name, package count, and URLs, making them easy to customize without modifying code.
 
 This modular approach keeps the workflow clean (94 lines vs 210+ lines of inline code) and makes scripts reusable and testable.
 
