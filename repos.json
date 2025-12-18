@@ -1,0 +1,9 @@
+{
+  "repositories": [
+    {
+      "owner": "the78mole",
+      "repo": "libcarla",
+      "description": "CARLA library packages"
+    }
+  ]
+}
