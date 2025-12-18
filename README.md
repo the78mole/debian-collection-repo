@@ -63,18 +63,22 @@ Edit `repos.json` to add repositories to collect packages from:
 
 1. Go to repository Settings → Pages
 2. Under "Source", select "GitHub Actions"
-3. The repository will be published at `https://the78mole.github.io/debian-collection-repo`
+3. The repository will be published at `https://<your-username>.github.io/<repository-name>`
 
 ## Using the Repository
 
 ### On Debian/Ubuntu Systems
 
+After the workflow completes, visit your GitHub Pages URL (e.g., `https://the78mole.github.io/debian-collection-repo`) for specific instructions tailored to your repository.
+
+General template:
+
 ```bash
 # Download and add the GPG key
-curl -fsSL https://the78mole.github.io/debian-collection-repo/public.key | sudo gpg --dearmor -o /usr/share/keyrings/debian-collection-repo.gpg
+curl -fsSL https://<your-username>.github.io/<repository-name>/public.key | sudo gpg --dearmor -o /usr/share/keyrings/<repository-name>.gpg
 
 # Add the repository
-echo "deb [arch=amd64 signed-by=/usr/share/keyrings/debian-collection-repo.gpg] https://the78mole.github.io/debian-collection-repo stable main" | sudo tee /etc/apt/sources.list.d/debian-collection-repo.list
+echo "deb [arch=amd64 signed-by=/usr/share/keyrings/<repository-name>.gpg] https://<your-username>.github.io/<repository-name> stable main" | sudo tee /etc/apt/sources.list.d/<repository-name>.list
 
 # Update package lists
 sudo apt update

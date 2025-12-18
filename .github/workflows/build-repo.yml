@@ -20,7 +20,11 @@ permissions:
 jobs:
   build-repository:
     runs-on: ubuntu-latest
-    
+
+    env:
+      REPO_OWNER: ${{ github.repository_owner }}
+      REPO_NAME: ${{ github.event.repository.name }}
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -42,29 +46,34 @@ jobs:
         run: |
           # Read repositories from config
           repos=$(jq -c '.repositories[]' repos.json)
-          
+
           while IFS= read -r repo; do
             owner=$(echo "$repo" | jq -r '.owner')
             repo_name=$(echo "$repo" | jq -r '.repo')
             echo "Processing $owner/$repo_name"
-            
+
             # Get latest release
             release_info=$(curl -s -H "Authorization: token $GITHUB_TOKEN" \
               "https://api.github.com/repos/$owner/$repo_name/releases/latest")
-            
+
             if [ "$(echo "$release_info" | jq -r '.message')" = "Not Found" ]; then
-              echo "No releases found for $owner/$repo_name, checking all releases..."
-              release_info=$(curl -s -H "Authorization: token $GITHUB_TOKEN" \
-                "https://api.github.com/repos/$owner/$repo_name/releases" | jq '.[0]')
+              echo "No 'latest' release found for $owner/$repo_name, checking all releases..."
+              all_releases=$(curl -s -H "Authorization: token $GITHUB_TOKEN" \
+                "https://api.github.com/repos/$owner/$repo_name/releases")
+
+              if [ "$(echo "$all_releases" | jq 'length')" = "0" ]; then
+                echo "No releases found for $owner/$repo_name, skipping..."
+                continue
+              fi
+
+              release_info=$(echo "$all_releases" | jq '.[0]')
             fi
-            
+
             # Download all .deb files from the release
             echo "$release_info" | jq -r '.assets[]? | select(.name | endswith(".deb")) | .browser_download_url' | while read url; do
               if [ -n "$url" ]; then
                 echo "Downloading $url"
-                cd downloads
-                curl -L -O -H "Authorization: token $GITHUB_TOKEN" "$url"
-                cd ..
+                (cd downloads && curl -L -O -H "Authorization: token $GITHUB_TOKEN" "$url")
               fi
             done
           done <<< "$repos"
@@ -81,7 +90,7 @@ jobs:
           fi
       
       - name: Import GPG key
-        if: ${{ secrets.GPG_PRIVATE_KEY != '' }}
+        if: ${{ secrets.GPG_PRIVATE_KEY }}
         env:
           GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
         run: |
@@ -107,8 +116,8 @@ jobs:
         run: |
           cd apt-repo/dists/stable
           cat > Release <<EOF
-          Origin: debian-collection-repo
-          Label: Debian Collection Repository
+          Origin: $REPO_NAME
+          Label: $REPO_NAME APT Repository
           Suite: stable
           Codename: stable
           Architectures: amd64
@@ -153,11 +162,12 @@ jobs:
       
       - name: Create index.html
         run: |
-          cat > apt-repo/index.html <<'EOF'
+          PAGES_URL="https://${REPO_OWNER}.github.io/${REPO_NAME}"
+          cat > apt-repo/index.html <<EOF
           <!DOCTYPE html>
           <html>
           <head>
-              <title>Debian Collection Repository</title>
+              <title>${REPO_NAME} - APT Repository</title>
               <style>
                   body { font-family: Arial, sans-serif; margin: 40px; }
                   pre { background-color: #f4f4f4; padding: 10px; border-radius: 5px; }
@@ -165,21 +175,21 @@ jobs:
               </style>
           </head>
           <body>
-              <h1>Debian Collection Repository</h1>
+              <h1>${REPO_NAME}</h1>
               <p>This repository provides Debian packages from multiple projects.</p>
-              
+
               <h2>Adding this repository to your system</h2>
               <pre>
           # Download and add the GPG key
-          curl -fsSL https://the78mole.github.io/debian-collection-repo/public.key | sudo gpg --dearmor -o /usr/share/keyrings/debian-collection-repo.gpg
-          
+          curl -fsSL ${PAGES_URL}/public.key | sudo gpg --dearmor -o /usr/share/keyrings/${REPO_NAME}.gpg
+
           # Add the repository
-          echo "deb [arch=amd64 signed-by=/usr/share/keyrings/debian-collection-repo.gpg] https://the78mole.github.io/debian-collection-repo stable main" | sudo tee /etc/apt/sources.list.d/debian-collection-repo.list
-          
+          echo "deb [arch=amd64 signed-by=/usr/share/keyrings/${REPO_NAME}.gpg] ${PAGES_URL} stable main" | sudo tee /etc/apt/sources.list.d/${REPO_NAME}.list
+
           # Update package lists
           sudo apt update
               </pre>
-              
+
               <h2>Repository Structure</h2>
               <ul>
                   <li><a href="dists/stable/main/binary-amd64/Packages">Packages</a></li>
