@@ -109,12 +109,31 @@ apt-repo/
 │       └── main/
 │           └── binary-amd64/
 │               ├── Packages    # Package index
-│               └── Packages.gz # Compressed index
+│               ├── Packages.gz # Compressed index
+│               └── index.html  # Directory listing
 ├── pool/
-│   └── main/               # Actual .deb packages
+│   └── main/
+│       ├── *.deb           # Actual .deb packages
+│       └── index.html      # Directory listing
 ├── public.key              # GPG public key
 └── index.html             # Repository homepage
 ```
+
+Each directory includes an `index.html` file for easy browsing of the repository structure.
+
+## Workflow Architecture
+
+The workflow is modular and uses separate scripts for maintainability:
+
+### Scripts (`.github/scripts/`)
+
+- **`download-packages.sh`** - Downloads `.deb` files from GitHub releases
+- **`generate-metadata.sh`** - Creates APT repository metadata (Packages, Release)
+- **`sign-release.sh`** - Signs Release file with GPG key
+- **`generate-frontpage.sh`** - Creates enhanced HTML front page with usage info
+- **`generate-indexes.sh`** - Generates directory index files for all folders
+
+This modular approach keeps the workflow clean (94 lines vs 210+ lines of inline code) and makes scripts reusable and testable.
 
 ## Workflow Schedule
 
