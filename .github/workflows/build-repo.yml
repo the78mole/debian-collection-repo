@@ -81,7 +81,7 @@ jobs:
           fi
       
       - name: Import GPG key
-        if: env.GPG_PRIVATE_KEY != ''
+        if: ${{ secrets.GPG_PRIVATE_KEY != '' }}
         env:
           GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
         run: |
@@ -116,21 +116,27 @@ jobs:
           Description: Multi-project Debian package repository
           Date: $(date -Ru)
           EOF
-          
+
           # Add file hashes
           echo "MD5Sum:" >> Release
           find main -type f | while read file; do
-            md5sum "$file" | awk '{printf " %s %16d %s\n", $1, $2, $3}' >> Release
+            size=$(stat -c%s "$file")
+            hash=$(md5sum "$file" | awk '{print $1}')
+            printf " %s %16d %s\n" "$hash" "$size" "$file" >> Release
           done
-          
+
           echo "SHA1:" >> Release
           find main -type f | while read file; do
-            sha1sum "$file" | awk '{printf " %s %16d %s\n", $1, $2, $3}' >> Release
+            size=$(stat -c%s "$file")
+            hash=$(sha1sum "$file" | awk '{print $1}')
+            printf " %s %16d %s\n" "$hash" "$size" "$file" >> Release
           done
-          
+
           echo "SHA256:" >> Release
           find main -type f | while read file; do
-            sha256sum "$file" | awk '{printf " %s %16d %s\n", $1, $2, $3}' >> Release
+            size=$(stat -c%s "$file")
+            hash=$(sha256sum "$file" | awk '{print $1}')
+            printf " %s %16d %s\n" "$hash" "$size" "$file" >> Release
           done
       
       - name: Sign Release file
