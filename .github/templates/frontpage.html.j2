@@ -126,12 +126,12 @@
                 <div class="stat-label">Available Packages</div>
             </div>
             <div class="stat-box">
-                <div class="stat-number">1</div>
-                <div class="stat-label">Distribution (stable)</div>
+                <div class="stat-number">2</div>
+                <div class="stat-label">Ubuntu Releases</div>
             </div>
             <div class="stat-box">
-                <div class="stat-number">amd64</div>
-                <div class="stat-label">Architecture</div>
+                <div class="stat-number">amd64, arm64</div>
+                <div class="stat-label">Architectures</div>
             </div>
         </div>
 
@@ -142,23 +142,46 @@
         <pre>curl -fsSL {{ pages_url }}/public.key | sudo gpg --dearmor -o /usr/share/keyrings/{{ repo_name }}.gpg</pre>
 
         <h3>2. Add Repository</h3>
-        <pre>echo "deb [arch=amd64 signed-by=/usr/share/keyrings/{{ repo_name }}.gpg] {{ pages_url }} stable main" | sudo tee /etc/apt/sources.list.d/{{ repo_name }}.list</pre>
+        <p>Choose the command for your Ubuntu version and architecture:</p>
+        
+        <p><strong>Ubuntu 22.04 (Jammy)</strong> - amd64:</p>
+        <pre>echo "deb [arch=amd64 signed-by=/usr/share/keyrings/{{ repo_name }}.gpg] {{ pages_url }} jammy main" | sudo tee /etc/apt/sources.list.d/{{ repo_name }}.list</pre>
+        
+        <p><strong>Ubuntu 22.04 (Jammy)</strong> - arm64:</p>
+        <pre>echo "deb [arch=arm64 signed-by=/usr/share/keyrings/{{ repo_name }}.gpg] {{ pages_url }} jammy main" | sudo tee /etc/apt/sources.list.d/{{ repo_name }}.list</pre>
+        
+        <p><strong>Ubuntu 24.04 (Noble)</strong> - amd64:</p>
+        <pre>echo "deb [arch=amd64 signed-by=/usr/share/keyrings/{{ repo_name }}.gpg] {{ pages_url }} noble main" | sudo tee /etc/apt/sources.list.d/{{ repo_name }}.list</pre>
+        
+        <p><strong>Ubuntu 24.04 (Noble)</strong> - arm64:</p>
+        <pre>echo "deb [arch=arm64 signed-by=/usr/share/keyrings/{{ repo_name }}.gpg] {{ pages_url }} noble main" | sudo tee /etc/apt/sources.list.d/{{ repo_name }}.list</pre>
 
         <h3>3. Update and Install</h3>
         <pre>sudo apt update
 sudo apt install &lt;package-name&gt;</pre>
 
         <div class="info-box">
-            <strong>💡 Tip:</strong> To see all available packages, use <code>apt search ''</code> after adding the repository, or browse the <a href="dists/stable/main/binary-amd64/Packages">Packages</a> file.
+            <strong>💡 Tip:</strong> To see all available packages, use <code>apt search ''</code> after adding the repository, or browse the Packages file for your Ubuntu version and architecture:
+            <br><strong>Ubuntu 22.04:</strong> <a href="dists/jammy/main/binary-amd64/Packages">amd64</a> | <a href="dists/jammy/main/binary-arm64/Packages">arm64</a>
+            <br><strong>Ubuntu 24.04:</strong> <a href="dists/noble/main/binary-amd64/Packages">amd64</a> | <a href="dists/noble/main/binary-arm64/Packages">arm64</a>
         </div>
 
         <h2>📂 Repository Structure</h2>
         <p>Browse the repository contents:</p>
         <ul>
             <li><a href="pool/main/">pool/main/</a> - Package pool (all .deb files)</li>
-            <li><a href="dists/stable/">dists/stable/</a> - Distribution metadata</li>
-            <li><a href="dists/stable/main/binary-amd64/Packages">Packages</a> - Package index</li>
-            <li><a href="dists/stable/Release">Release</a> - Release metadata</li>
+            <li><strong>Ubuntu 22.04 (Jammy):</strong></li>
+            <ul>
+                <li><a href="dists/jammy/">dists/jammy/</a> - Distribution metadata</li>
+                <li><a href="dists/jammy/main/binary-amd64/Packages">Packages (amd64)</a> | <a href="dists/jammy/main/binary-arm64/Packages">Packages (arm64)</a></li>
+                <li><a href="dists/jammy/Release">Release</a> - Release metadata</li>
+            </ul>
+            <li><strong>Ubuntu 24.04 (Noble):</strong></li>
+            <ul>
+                <li><a href="dists/noble/">dists/noble/</a> - Distribution metadata</li>
+                <li><a href="dists/noble/main/binary-amd64/Packages">Packages (amd64)</a> | <a href="dists/noble/main/binary-arm64/Packages">Packages (arm64)</a></li>
+                <li><a href="dists/noble/Release">Release</a> - Release metadata</li>
+            </ul>
             <li><a href="public.key">public.key</a> - GPG public key</li>
         </ul>
 
@@ -168,15 +191,26 @@ sudo apt install &lt;package-name&gt;</pre>
             <li><a href="public.key">Download the public key</a></li>
             <li>Verify the Release file signature manually:
                 <pre>curl -fsSL {{ pages_url }}/public.key | gpg --import
-gpg --verify dists/stable/InRelease</pre>
+gpg --verify dists/jammy/InRelease   # For Ubuntu 22.04
+gpg --verify dists/noble/InRelease   # For Ubuntu 24.04</pre>
             </li>
         </ul>
 
         <h2>📋 Package Listing</h2>
-        <p>View available packages:</p>
+        <p>View available packages by Ubuntu version and architecture:</p>
         <ul>
-            <li><a href="dists/stable/main/binary-amd64/Packages">Packages (uncompressed)</a> - Human-readable package list</li>
-            <li><a href="dists/stable/main/binary-amd64/Packages.gz">Packages.gz</a> - Compressed package list</li>
+            <li><strong>Ubuntu 22.04 (Jammy):</strong>
+                <ul>
+                    <li>amd64: <a href="dists/jammy/main/binary-amd64/Packages">Packages</a> | <a href="dists/jammy/main/binary-amd64/Packages.gz">Packages.gz</a></li>
+                    <li>arm64: <a href="dists/jammy/main/binary-arm64/Packages">Packages</a> | <a href="dists/jammy/main/binary-arm64/Packages.gz">Packages.gz</a></li>
+                </ul>
+            </li>
+            <li><strong>Ubuntu 24.04 (Noble):</strong>
+                <ul>
+                    <li>amd64: <a href="dists/noble/main/binary-amd64/Packages">Packages</a> | <a href="dists/noble/main/binary-amd64/Packages.gz">Packages.gz</a></li>
+                    <li>arm64: <a href="dists/noble/main/binary-arm64/Packages">Packages</a> | <a href="dists/noble/main/binary-arm64/Packages.gz">Packages.gz</a></li>
+                </ul>
+            </li>
         </ul>
         <a href="pool/main/" class="browse-link">Browse Package Pool →</a>
 

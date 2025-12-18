@@ -102,21 +102,40 @@ The workflow can be manually triggered from the Actions tab:
 ```
 apt-repo/
 ├── dists/
-│   └── stable/
-│       ├── Release          # Repository metadata
-│       ├── Release.gpg      # GPG signature
-│       ├── InRelease        # Signed Release file
+│   ├── jammy/                    # Ubuntu 22.04 LTS
+│   │   ├── Release               # Repository metadata
+│   │   ├── Release.gpg          # GPG signature
+│   │   ├── InRelease            # Signed Release file
+│   │   └── main/
+│   │       ├── binary-amd64/
+│   │       │   ├── Packages     # Package index (amd64)
+│   │       │   ├── Packages.gz  # Compressed index
+│   │       │   └── index.html   # Directory listing
+│   │       └── binary-arm64/
+│   │           ├── Packages     # Package index (arm64)
+│   │           ├── Packages.gz  # Compressed index
+│   │           └── index.html   # Directory listing
+│   └── noble/                    # Ubuntu 24.04 LTS
+│       ├── Release               # Repository metadata
+│       ├── Release.gpg          # GPG signature
+│       ├── InRelease            # Signed Release file
 │       └── main/
-│           └── binary-amd64/
-│               ├── Packages    # Package index
-│               ├── Packages.gz # Compressed index
-│               └── index.html  # Directory listing
+│           ├── binary-amd64/
+│           │   ├── Packages     # Package index (amd64)
+│           │   ├── Packages.gz  # Compressed index
+│           │   └── index.html   # Directory listing
+│           └── binary-arm64/
+│               ├── Packages     # Package index (arm64)
+│               ├── Packages.gz  # Compressed index
+│               └── index.html   # Directory listing
 ├── pool/
 │   └── main/
-│       ├── *.deb           # Actual .deb packages
-│       └── index.html      # Directory listing
-├── public.key              # GPG public key
-└── index.html             # Repository homepage
+│       ├── *_amd64.deb          # amd64 packages
+│       ├── *_arm64.deb          # arm64 packages
+│       ├── *_all.deb            # Architecture-independent packages
+│       └── index.html           # Directory listing
+├── public.key                   # GPG public key
+└── index.html                   # Repository homepage
 ```
 
 Each directory includes an `index.html` file for easy browsing of the repository structure.

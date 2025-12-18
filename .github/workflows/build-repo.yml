@@ -32,9 +32,19 @@ jobs:
 
       - name: Setup directories
         run: |
+          # Define supported Ubuntu distributions
+          DISTRIBUTIONS="jammy noble"  # Ubuntu 22.04, 24.04
+          ARCHITECTURES="amd64 arm64"
+          
           mkdir -p apt-repo/pool/main
-          mkdir -p apt-repo/dists/stable/main/binary-amd64
           mkdir -p downloads
+          
+          # Create directory structure for each distribution and architecture
+          for dist in $DISTRIBUTIONS; do
+            for arch in $ARCHITECTURES; do
+              mkdir -p "apt-repo/dists/$dist/main/binary-$arch"
+            done
+          done
 
       - name: Install dependencies
         run: |
