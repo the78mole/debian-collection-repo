@@ -11,6 +11,7 @@ on:
     paths:
       - 'repos.json'
       - '.github/workflows/build-repo.yml'
+      - '.github/scripts/*.sh'
 
 permissions:
   contents: write
@@ -28,56 +29,23 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-      
+
       - name: Setup directories
         run: |
           mkdir -p apt-repo/pool/main
           mkdir -p apt-repo/dists/stable/main/binary-amd64
           mkdir -p downloads
-      
+
       - name: Install dependencies
         run: |
           sudo apt-get update
           sudo apt-get install -y dpkg-dev gnupg jq curl
-      
+
       - name: Download packages from repositories
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          # Read repositories from config
-          repos=$(jq -c '.repositories[]' repos.json)
+        run: .github/scripts/download-packages.sh repos.json
 
-          while IFS= read -r repo; do
-            owner=$(echo "$repo" | jq -r '.owner')
-            repo_name=$(echo "$repo" | jq -r '.repo')
-            echo "Processing $owner/$repo_name"
-
-            # Get latest release
-            release_info=$(curl -s -H "Authorization: token $GITHUB_TOKEN" \
-              "https://api.github.com/repos/$owner/$repo_name/releases/latest")
-
-            if [ "$(echo "$release_info" | jq -r '.message')" = "Not Found" ]; then
-              echo "No 'latest' release found for $owner/$repo_name, checking all releases..."
-              all_releases=$(curl -s -H "Authorization: token $GITHUB_TOKEN" \
-                "https://api.github.com/repos/$owner/$repo_name/releases")
-
-              if [ "$(echo "$all_releases" | jq 'length')" = "0" ]; then
-                echo "No releases found for $owner/$repo_name, skipping..."
-                continue
-              fi
-
-              release_info=$(echo "$all_releases" | jq '.[0]')
-            fi
-
-            # Download all .deb files from the release
-            echo "$release_info" | jq -r '.assets[]? | select(.name | endswith(".deb")) | .browser_download_url' | while read url; do
-              if [ -n "$url" ]; then
-                echo "Downloading $url"
-                (cd downloads && curl -L -O -H "Authorization: token $GITHUB_TOKEN" "$url")
-              fi
-            done
-          done <<< "$repos"
-      
       - name: Copy packages to pool
         run: |
           if [ -n "$(ls -A downloads/*.deb 2>/dev/null)" ]; then
@@ -85,126 +53,42 @@ jobs:
             echo "Copied $(ls downloads/*.deb 2>/dev/null | wc -l) packages"
           else
             echo "No packages found to copy"
-            # Create a dummy package list to avoid empty repository
             touch apt-repo/dists/stable/main/binary-amd64/Packages
           fi
-      
+
       - name: Import GPG key
         if: ${{ secrets.GPG_PRIVATE_KEY }}
         env:
           GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
         run: |
           echo "$GPG_PRIVATE_KEY" | gpg --import --batch --yes
-          # Get the key ID
           KEY_ID=$(gpg --list-secret-keys --keyid-format LONG | grep sec | head -1 | awk '{print $2}' | cut -d'/' -f2)
           echo "GPG_KEY_ID=$KEY_ID" >> $GITHUB_ENV
-      
-      - name: Generate Packages file
-        run: |
-          cd apt-repo
-          # Generate Packages file for binary-amd64
-          if [ -n "$(ls -A pool/main/*.deb 2>/dev/null)" ]; then
-            dpkg-scanpackages --multiversion pool/main > dists/stable/main/binary-amd64/Packages
-            gzip -k -f dists/stable/main/binary-amd64/Packages
-          else
-            echo "No packages to scan"
-            touch dists/stable/main/binary-amd64/Packages
-            gzip -k -f dists/stable/main/binary-amd64/Packages
-          fi
-      
-      - name: Generate Release file
-        run: |
-          cd apt-repo/dists/stable
-          cat > Release <<EOF
-          Origin: $REPO_NAME
-          Label: $REPO_NAME APT Repository
-          Suite: stable
-          Codename: stable
-          Architectures: amd64
-          Components: main
-          Description: Multi-project Debian package repository
-          Date: $(date -Ru)
-          EOF
 
-          # Add file hashes
-          echo "MD5Sum:" >> Release
-          find main -type f | while read file; do
-            size=$(stat -c%s "$file")
-            hash=$(md5sum "$file" | awk '{print $1}')
-            printf " %s %16d %s\n" "$hash" "$size" "$file" >> Release
-          done
+      - name: Generate APT repository metadata
+        run: .github/scripts/generate-metadata.sh apt-repo
 
-          echo "SHA1:" >> Release
-          find main -type f | while read file; do
-            size=$(stat -c%s "$file")
-            hash=$(sha1sum "$file" | awk '{print $1}')
-            printf " %s %16d %s\n" "$hash" "$size" "$file" >> Release
-          done
-
-          echo "SHA256:" >> Release
-          find main -type f | while read file; do
-            size=$(stat -c%s "$file")
-            hash=$(sha256sum "$file" | awk '{print $1}')
-            printf " %s %16d %s\n" "$hash" "$size" "$file" >> Release
-          done
-      
       - name: Sign Release file
         if: env.GPG_KEY_ID != ''
-        run: |
-          cd apt-repo/dists/stable
-          gpg --default-key $GPG_KEY_ID -abs -o Release.gpg Release
-          gpg --default-key $GPG_KEY_ID -abs --clearsign -o InRelease Release
-      
+        run: .github/scripts/sign-release.sh apt-repo
+
       - name: Export GPG public key
         if: env.GPG_KEY_ID != ''
         run: |
           gpg --armor --export $GPG_KEY_ID > apt-repo/public.key
-      
-      - name: Create index.html
-        run: |
-          PAGES_URL="https://${REPO_OWNER}.github.io/${REPO_NAME}"
-          cat > apt-repo/index.html <<EOF
-          <!DOCTYPE html>
-          <html>
-          <head>
-              <title>${REPO_NAME} - APT Repository</title>
-              <style>
-                  body { font-family: Arial, sans-serif; margin: 40px; }
-                  pre { background-color: #f4f4f4; padding: 10px; border-radius: 5px; }
-                  h1 { color: #333; }
-              </style>
-          </head>
-          <body>
-              <h1>${REPO_NAME}</h1>
-              <p>This repository provides Debian packages from multiple projects.</p>
 
-              <h2>Adding this repository to your system</h2>
-              <pre>
-          # Download and add the GPG key
-          curl -fsSL ${PAGES_URL}/public.key | sudo gpg --dearmor -o /usr/share/keyrings/${REPO_NAME}.gpg
+      - name: Generate front page
+        run: .github/scripts/generate-frontpage.sh apt-repo
 
-          # Add the repository
-          echo "deb [arch=amd64 signed-by=/usr/share/keyrings/${REPO_NAME}.gpg] ${PAGES_URL} stable main" | sudo tee /etc/apt/sources.list.d/${REPO_NAME}.list
+      - name: Generate directory indexes
+        run: .github/scripts/generate-indexes.sh apt-repo
 
-          # Update package lists
-          sudo apt update
-              </pre>
-
-              <h2>Repository Structure</h2>
-              <ul>
-                  <li><a href="dists/stable/main/binary-amd64/Packages">Packages</a></li>
-                  <li><a href="dists/stable/Release">Release</a></li>
-                  <li><a href="public.key">GPG Public Key</a></li>
-              </ul>
-          </body>
-          </html>
-          EOF
-      
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
           path: apt-repo
-      
+
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+
