@@ -2,6 +2,10 @@
 
 This repository automatically collects Debian packages from multiple GitHub repositories and publishes them as a unified APT repository via GitHub Pages.
 
+## Quick Start
+
+New to this repository? Check out the [Quick Start Guide](QUICKSTART.md) for step-by-step setup instructions.
+
 ## Features
 
 - 🔄 Automatic collection of `.deb` packages from multiple GitHub repositories
