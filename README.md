@@ -65,9 +65,13 @@ Edit `repos.json` to add repositories to collect packages from:
 
 ### Enabling GitHub Pages
 
+GitHub Pages will be automatically configured when you first run the workflow. After the workflow completes successfully:
+
 1. Go to repository Settings → Pages
-2. Under "Source", select "GitHub Actions"
-3. The repository will be published at `https://<your-username>.github.io/<repository-name>`
+2. Verify that the source is set to "GitHub Actions"
+3. Your repository will be published at `https://<your-username>.github.io/<repository-name>`
+
+**Note:** If this is your first deployment, GitHub Pages will be automatically enabled. You don't need to manually configure anything - just run the workflow!
 
 ## Using the Repository
 
