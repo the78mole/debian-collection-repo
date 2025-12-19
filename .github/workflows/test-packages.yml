@@ -36,16 +36,78 @@ jobs:
           echo "$MATRIX" | jq .
           echo "matrix=$MATRIX" >> $GITHUB_OUTPUT
   
-  test-installation:
+  generate-package-matrix:
     runs-on: ubuntu-latest
     needs: generate-matrix
+    outputs:
+      package-matrix: ${{ steps.set-package-matrix.outputs.matrix }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
+      - name: Get repository URL
+        id: repo-url
+        run: |
+          REPO_URL="https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}"
+          echo "url=$REPO_URL" >> $GITHUB_OUTPUT
+      
+      - name: Generate package matrix
+        id: set-package-matrix
+        run: |
+          chmod +x .github/scripts/get-packages-from-repo.sh
+          
+          # Generate matrix with packages for each distribution/architecture
+          MATRIX_JSON='{"include":[]}'
+          
+          for item in $(echo '${{ needs.generate-matrix.outputs.matrix }}' | jq -c '.include[]'); do
+            DISTRO=$(echo "$item" | jq -r '.distro')
+            VERSION=$(echo "$item" | jq -r '.version')
+            CODENAME=$(echo "$item" | jq -r '.codename')
+            ARCH=$(echo "$item" | jq -r '.arch')
+            DISPLAY_NAME=$(echo "$item" | jq -r '.display_name')
+            
+            # Get packages for this distribution/architecture
+            PACKAGES=$(.github/scripts/get-packages-from-repo.sh \
+              "${{ steps.repo-url.outputs.url }}" \
+              "$CODENAME" \
+              "$ARCH" 2>/dev/null || echo "")
+            
+            if [ -n "$PACKAGES" ]; then
+              # Add each package as a separate matrix entry
+              for pkg in $PACKAGES; do
+                MATRIX_JSON=$(echo "$MATRIX_JSON" | jq \
+                  --arg distro "$DISTRO" \
+                  --arg version "$VERSION" \
+                  --arg codename "$CODENAME" \
+                  --arg arch "$ARCH" \
+                  --arg display "$DISPLAY_NAME" \
+                  --arg package "$pkg" \
+                  '.include += [{
+                    "distro": $distro,
+                    "version": $version,
+                    "codename": $codename,
+                    "arch": $arch,
+                    "display_name": $display,
+                    "package": $package
+                  }]')
+              done
+            fi
+          done
+          
+          echo "Package matrix generated:"
+          echo "$MATRIX_JSON" | jq .
+          echo "matrix=$MATRIX_JSON" >> $GITHUB_OUTPUT
+  
+  test-installation:
+    runs-on: ubuntu-latest
+    needs: generate-package-matrix
     if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
     
     strategy:
       fail-fast: false
-      matrix: ${{ fromJson(needs.generate-matrix.outputs.matrix) }}
+      matrix: ${{ fromJson(needs.generate-package-matrix.outputs.package-matrix) }}
     
-    name: Test ${{ matrix.distro }} ${{ matrix.version }} (${{ matrix.arch }})
+    name: Test ${{ matrix.package }} on ${{ matrix.distro }} ${{ matrix.version }} (${{ matrix.arch }})
     
     steps:
       - name: Checkout repository
@@ -71,21 +133,39 @@ jobs:
       
       - name: Test installation in container
         run: |
-          .github/scripts/run-container-test.sh \
-            "${{ matrix.distro }}" \
-            "${{ matrix.version }}" \
-            "${{ matrix.codename }}" \
-            "${{ matrix.arch }}" \
+          # Test single package
+          PLATFORM="${{ matrix.arch }}"
+          if [ "$PLATFORM" = "amd64" ]; then
+            PLATFORM="linux/amd64"
+          elif [ "$PLATFORM" = "arm64" ]; then
+            PLATFORM="linux/arm64"
+          fi
+          
+          # Determine base image
+          if [ "${{ matrix.distro }}" = "ubuntu" ]; then
+            BASE_IMAGE="ubuntu:${{ matrix.version }}"
+          else
+            BASE_IMAGE="debian:${{ matrix.codename }}"
+          fi
+          
+          echo "Testing package ${{ matrix.package }} on $BASE_IMAGE ($PLATFORM)"
+          
+          docker run --platform="$PLATFORM" --rm \
+            -v "$(pwd)/.github/scripts/test-installation.sh:/test-install.sh:ro" \
+            "$BASE_IMAGE" \
+            /bin/bash /test-install.sh \
             "${{ steps.repo-url.outputs.url }}" \
-            "${{ github.event.repository.name }}"
+            "${{ matrix.codename }}" \
+            "${{ github.event.repository.name }}" \
+            "${{ matrix.package }}"
       
       - name: Report results
         if: always()
         run: |
           if [ "${{ job.status }}" = "success" ]; then
-            echo "✅ Installation test PASSED for ${{ matrix.distro }} ${{ matrix.version }} (${{ matrix.arch }})"
+            echo "✅ ${{ matrix.package }} installation test PASSED on ${{ matrix.distro }} ${{ matrix.version }} (${{ matrix.arch }})"
           else
-            echo "❌ Installation test FAILED for ${{ matrix.distro }} ${{ matrix.version }} (${{ matrix.arch }})"
+            echo "❌ ${{ matrix.package }} installation test FAILED on ${{ matrix.distro }} ${{ matrix.version }} (${{ matrix.arch }})"
           fi
   
   summary:
@@ -98,6 +178,6 @@ jobs:
         run: |
           echo "## Package Installation Test Summary" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "Test workflow completed for all distributions and architectures." >> $GITHUB_STEP_SUMMARY
+          echo "Test workflow completed for all package/distribution/architecture combinations." >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "Check individual job results above for details." >> $GITHUB_STEP_SUMMARY

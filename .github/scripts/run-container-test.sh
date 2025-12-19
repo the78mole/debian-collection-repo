@@ -76,10 +76,10 @@ for pkg in $PACKAGES; do
     "$pkg"; then
     
     echo "✅ Package $pkg: SUCCESS"
-    ((SUCCESS_COUNT++))
+    SUCCESS_COUNT=$((SUCCESS_COUNT + 1))
   else
     echo "❌ Package $pkg: FAILED"
-    ((FAIL_COUNT++))
+    FAIL_COUNT=$((FAIL_COUNT + 1))
   fi
   
   echo ""
@@ -93,5 +93,9 @@ echo "Successful: $SUCCESS_COUNT"
 echo "Failed: $FAIL_COUNT"
 
 if [ $FAIL_COUNT -gt 0 ]; then
+  echo "⚠️  Some packages failed to install"
   exit 1
 fi
+
+echo "✅ All packages installed successfully"
+exit 0
