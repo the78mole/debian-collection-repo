@@ -1,47 +1,46 @@
 #!/bin/bash
 # Generate distributions list from distros.yaml
 # Usage: source load-distros.sh
-# Sets: DISTRIBUTIONS, ARCHITECTURES arrays
-
-set -e
+# Sets: DISTRIBUTIONS, ARCHITECTURES, COMPONENTS
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 CONFIG_FILE="${SCRIPT_DIR}/../../distros.yaml"
 
-# Install yq if not present
-if ! command -v yq &> /dev/null; then
-    echo "yq not found, using Python to parse YAML"
-    
-    # Use Python as fallback
-    read_yaml_python() {
-        python3 -c "
+# Ensure PyYAML is installed
+if ! python3 -c "import yaml" 2>/dev/null; then
+    echo "Installing PyYAML..." >&2
+    python3 -m pip install --user pyyaml >&2
+fi
+
+# Use Python to parse YAML (more reliable than yq)
+read_yaml_python() {
+    python3 << EOF
 import yaml
 import sys
-with open('$CONFIG_FILE', 'r') as f:
-    config = yaml.safe_load(f)
-    if sys.argv[1] == 'distributions':
+
+try:
+    with open('$CONFIG_FILE', 'r') as f:
+        config = yaml.safe_load(f)
+        
+    if '$1' == 'distributions':
         print(' '.join([d['codename'] for d in config['distributions']]))
-    elif sys.argv[1] == 'architectures':
+    elif '$1' == 'architectures':
         # Get unique architectures across all distributions
         archs = set()
         for d in config['distributions']:
-            archs.update(d['architectures'])
+            archs.update(d.get('architectures', []))
         print(' '.join(sorted(archs)))
-    elif sys.argv[1] == 'components':
-        print(' '.join(config['components']))
-" "$1"
-    }
-    
-    DISTRIBUTIONS=$(read_yaml_python distributions)
-    ARCHITECTURES=$(read_yaml_python architectures)
-    COMPONENTS=$(read_yaml_python components)
-else
-    # Use yq if available
-    DISTRIBUTIONS=$(yq eval '.distributions[].codename' "$CONFIG_FILE" | tr '\n' ' ')
-    # Get unique architectures across all distributions
-    ARCHITECTURES=$(yq eval '.distributions[].architectures[]' "$CONFIG_FILE" | sort -u | tr '\n' ' ')
-    COMPONENTS=$(yq eval '.components[]' "$CONFIG_FILE" | tr '\n' ' ')
-fi
+    elif '$1' == 'components':
+        print(' '.join(config.get('components', ['main'])))
+except Exception as e:
+    print(f"Error reading config: {e}", file=sys.stderr)
+    sys.exit(1)
+EOF
+}
+
+DISTRIBUTIONS=$(read_yaml_python distributions)
+ARCHITECTURES=$(read_yaml_python architectures)
+COMPONENTS=$(read_yaml_python components)
 
 export DISTRIBUTIONS
 export ARCHITECTURES

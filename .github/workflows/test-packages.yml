@@ -25,12 +25,15 @@ jobs:
         uses: actions/checkout@v4
       
       - name: Install PyYAML
-        run: pip3 install pyyaml
+        run: |
+          python3 -m pip install --user pyyaml
       
       - name: Generate matrix from distros.yaml
         id: set-matrix
         run: |
           MATRIX=$(python3 .github/scripts/generate-matrix.py)
+          echo "Matrix generated:"
+          echo "$MATRIX" | jq .
           echo "matrix=$MATRIX" >> $GITHUB_OUTPUT
   
   test-installation:

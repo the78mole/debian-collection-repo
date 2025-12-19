@@ -37,6 +37,10 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Install Python dependencies
+        run: |
+          python3 -m pip install --user pyyaml jinja2
+
       - name: Setup directories
         run: |
           # Load distributions from distros.yaml
@@ -59,11 +63,10 @@ jobs:
             done
           done
 
-      - name: Install dependencies
+      - name: Install system dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y dpkg-dev gnupg jq curl python3-pip
-          pip3 install pyyaml jinja2
+          sudo apt-get install -y dpkg-dev gnupg jq curl
 
       - name: Download packages from repositories
         env:

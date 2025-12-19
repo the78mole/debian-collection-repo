@@ -9,13 +9,21 @@ import os
 try:
     import yaml
 except ImportError:
-    print("Error: PyYAML not installed. Installing...")
+    print("Error: PyYAML not installed. Installing...", file=sys.stderr)
     import subprocess
-    subprocess.check_call([sys.executable, '-m', 'pip', 'install', 'pyyaml'])
+    subprocess.check_call([sys.executable, '-m', 'pip', 'install', '--user', 'pyyaml'])
     import yaml
+
+try:
+    from jinja2 import Environment, FileSystemLoader
+except ImportError:
+    print("Error: Jinja2 not installed. Installing...", file=sys.stderr)
+    import subprocess
+    subprocess.check_call([sys.executable, '-m', 'pip', 'install', '--user', 'jinja2'])
+    from jinja2 import Environment, FileSystemLoader
+
 from datetime import datetime
 from pathlib import Path
-from jinja2 import Environment, FileSystemLoader
 
 def load_distros_config():
     """Load distributions configuration from distros.yaml"""
