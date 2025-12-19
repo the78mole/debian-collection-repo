@@ -56,15 +56,21 @@ jobs:
         run: |
           chmod +x .github/scripts/get-packages-from-repo.sh
           
+          # Save matrix to file for easier handling
+          echo '${{ needs.generate-matrix.outputs.matrix }}' > /tmp/dist-matrix.json
+          
           # Generate matrix with packages for each distribution/architecture
           MATRIX_JSON='{"include":[]}'
           
-          for item in $(echo '${{ needs.generate-matrix.outputs.matrix }}' | jq -c '.include[]'); do
+          # Read each distribution/architecture combination
+          while IFS= read -r item; do
             DISTRO=$(echo "$item" | jq -r '.distro')
             VERSION=$(echo "$item" | jq -r '.version')
             CODENAME=$(echo "$item" | jq -r '.codename')
             ARCH=$(echo "$item" | jq -r '.arch')
             DISPLAY_NAME=$(echo "$item" | jq -r '.display_name')
+            
+            echo "Processing $CODENAME/$ARCH..."
             
             # Get packages for this distribution/architecture
             PACKAGES=$(.github/scripts/get-packages-from-repo.sh \
@@ -74,26 +80,32 @@ jobs:
             
             if [ -n "$PACKAGES" ]; then
               # Add each package as a separate matrix entry
-              for pkg in $PACKAGES; do
-                MATRIX_JSON=$(echo "$MATRIX_JSON" | jq \
-                  --arg distro "$DISTRO" \
-                  --arg version "$VERSION" \
-                  --arg codename "$CODENAME" \
-                  --arg arch "$ARCH" \
-                  --arg display "$DISPLAY_NAME" \
-                  --arg package "$pkg" \
-                  '.include += [{
-                    "distro": $distro,
-                    "version": $version,
-                    "codename": $codename,
-                    "arch": $arch,
-                    "display_name": $display,
-                    "package": $package
-                  }]')
-              done
+              while IFS= read -r pkg; do
+                if [ -n "$pkg" ]; then
+                  echo "  Adding package: $pkg"
+                  MATRIX_JSON=$(echo "$MATRIX_JSON" | jq \
+                    --arg distro "$DISTRO" \
+                    --arg version "$VERSION" \
+                    --arg codename "$CODENAME" \
+                    --arg arch "$ARCH" \
+                    --arg display "$DISPLAY_NAME" \
+                    --arg package "$pkg" \
+                    '.include += [{
+                      "distro": $distro,
+                      "version": $version,
+                      "codename": $codename,
+                      "arch": $arch,
+                      "display_name": $display,
+                      "package": $package
+                    }]')
+                fi
+              done <<< "$PACKAGES"
+            else
+              echo "  No packages found"
             fi
-          done
+          done < <(jq -c '.include[]' /tmp/dist-matrix.json)
           
+          echo ""
           echo "Package matrix generated:"
           echo "$MATRIX_JSON" | jq .
           echo "matrix=$MATRIX_JSON" >> $GITHUB_OUTPUT
