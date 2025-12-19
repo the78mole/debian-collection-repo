@@ -9,7 +9,7 @@ echo "=== Updating package lists ==="
 apt-get update -qq
 
 echo "=== Installing dependencies ==="
-apt-get install -y -qq curl gnupg ca-certificates
+apt-get install -y -qq curl gnupg ca-certificates gzip
 
 echo "=== Adding repository key ==="
 curl -fsSL "${REPO_URL}/public.key" -o /tmp/repo.key
@@ -35,19 +35,31 @@ cat /etc/apt/sources.list.d/${REPO_NAME}.list
 echo "=== Updating package lists with new repository ==="
 apt-get update -qq
 
-echo "=== Listing available packages from repository ==="
-apt-cache search . | grep -v "^$" | head -20 || true
+echo "=== Fetching packages from repository ==="
+# Hole die Packages-Datei direkt aus dem Repository
+ARCH=$(dpkg --print-architecture)
+PACKAGES_URL="${REPO_URL}/dists/${CODENAME}/main/binary-${ARCH}/Packages"
 
-echo "=== Testing package installation ==="
-# Versuche alle verfügbaren Pakete aus dem Repository zu finden
-PACKAGES=$(apt-cache search . | awk '{print $1}' | grep -E '^[a-z]' | head -5)
+echo "Downloading package list from: ${PACKAGES_URL}"
+curl -fsSL "${PACKAGES_URL}" -o /tmp/packages.list || {
+  echo "Error: Could not download Packages file"
+  echo "Trying gzipped version..."
+  curl -fsSL "${PACKAGES_URL}.gz" -o /tmp/packages.list.gz && gunzip /tmp/packages.list.gz || {
+    echo "Error: No Packages file found for ${CODENAME}/${ARCH}"
+    exit 0
+  }
+}
+
+# Extrahiere Paketnamen aus der Packages-Datei
+PACKAGES=$(grep '^Package: ' /tmp/packages.list | awk '{print $2}' | head -5)
 
 if [ -z "$PACKAGES" ]; then
-  echo "Warning: No packages found in repository for this distribution"
+  echo "Warning: No packages found in repository for ${CODENAME} (${ARCH})"
   exit 0
 fi
 
-echo "Found packages: $PACKAGES"
+echo "=== Found packages in repository ==="
+echo "$PACKAGES"
 
 # Installiere jedes Paket einzeln und teste es
 for pkg in $PACKAGES; do
