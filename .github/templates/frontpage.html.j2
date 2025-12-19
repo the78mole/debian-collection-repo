@@ -223,64 +223,26 @@ sudo apt install &lt;package-name&gt;</pre>
                 <tr>
                     <th>Distribution</th>
                     <th>Packages</th>
-                    <th>amd64</th>
-                    <th>arm64</th>
+                    {% for arch in architectures %}
+                    <th>{{ arch }}</th>
+                    {% endfor %}
                     <th>Browse</th>
                 </tr>
             </thead>
             <tbody>
+                {% for dist in distributions %}
                 <tr>
-                    <td><strong>Ubuntu 22.04 (Jammy)</strong></td>
-                    <td>{{ distributions.get('jammy', 0) }}</td>
+                    <td><strong>{{ dist.display_name }}</strong></td>
+                    <td>{{ dist.package_count if dist.package_count else 0 }}</td>
+                    {% for arch in dist.architectures %}
                     <td>
-                        <a href="dists/jammy/main/binary-amd64/Packages">Packages</a> |
-                        <a href="dists/jammy/main/binary-amd64/Packages.gz">Packages.gz</a>
+                        <a href="dists/{{ dist.codename }}/main/binary-{{ arch }}/Packages">Packages</a> |
+                        <a href="dists/{{ dist.codename }}/main/binary-{{ arch }}/Packages.gz">Packages.gz</a>
                     </td>
-                    <td>
-                        <a href="dists/jammy/main/binary-arm64/Packages">Packages</a> |
-                        <a href="dists/jammy/main/binary-arm64/Packages.gz">Packages.gz</a>
-                    </td>
-                    <td><a href="pool/jammy/main/" class="browse-link">Browse →</a></td>
+                    {% endfor %}
+                    <td><a href="pool/{{ dist.codename }}/main/" class="browse-link">Browse →</a></td>
                 </tr>
-                <tr>
-                    <td><strong>Ubuntu 24.04 (Noble)</strong></td>
-                    <td>{{ distributions.get('noble', 0) }}</td>
-                    <td>
-                        <a href="dists/noble/main/binary-amd64/Packages">Packages</a> |
-                        <a href="dists/noble/main/binary-amd64/Packages.gz">Packages.gz</a>
-                    </td>
-                    <td>
-                        <a href="dists/noble/main/binary-arm64/Packages">Packages</a> |
-                        <a href="dists/noble/main/binary-arm64/Packages.gz">Packages.gz</a>
-                    </td>
-                    <td><a href="pool/noble/main/" class="browse-link">Browse →</a></td>
-                </tr>
-                <tr>
-                    <td><strong>Debian 12 (Bookworm)</strong></td>
-                    <td>{{ distributions.get('bookworm', 0) }}</td>
-                    <td>
-                        <a href="dists/bookworm/main/binary-amd64/Packages">Packages</a> |
-                        <a href="dists/bookworm/main/binary-amd64/Packages.gz">Packages.gz</a>
-                    </td>
-                    <td>
-                        <a href="dists/bookworm/main/binary-arm64/Packages">Packages</a> |
-                        <a href="dists/bookworm/main/binary-arm64/Packages.gz">Packages.gz</a>
-                    </td>
-                    <td><a href="pool/bookworm/main/" class="browse-link">Browse →</a></td>
-                </tr>
-                <tr>
-                    <td><strong>Debian 13 (Trixie)</strong></td>
-                    <td>{{ distributions.get('trixie', 0) }}</td>
-                    <td>
-                        <a href="dists/trixie/main/binary-amd64/Packages">Packages</a> |
-                        <a href="dists/trixie/main/binary-amd64/Packages.gz">Packages.gz</a>
-                    </td>
-                    <td>
-                        <a href="dists/trixie/main/binary-arm64/Packages">Packages</a> |
-                        <a href="dists/trixie/main/binary-arm64/Packages.gz">Packages.gz</a>
-                    </td>
-                    <td><a href="pool/trixie/main/" class="browse-link">Browse →</a></td>
-                </tr>
+                {% endfor %}
             </tbody>
         </table>
 
