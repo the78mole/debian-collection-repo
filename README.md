@@ -1,5 +1,8 @@
 # Debian Collection Repository
 
+[![Repository](https://img.shields.io/badge/📦_APT_Repository-View_Packages-blue?style=for-the-badge)](https://the78mole.github.io/debian-collection-repo/)
+[![GitHub Pages](https://github.com/the78mole/debian-collection-repo/actions/workflows/build-repo.yml/badge.svg)](https://github.com/the78mole/debian-collection-repo/actions/workflows/build-repo.yml)
+
 This repository automatically collects Debian packages from multiple GitHub repositories and publishes them as a unified APT repository via GitHub Pages.
 
 ## Quick Start
