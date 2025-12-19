@@ -11,11 +11,36 @@ from pathlib import Path
 from jinja2 import Environment, FileSystemLoader
 
 def count_packages(apt_repo_dir):
-    """Count .deb files in pool/main"""
-    pool_dir = Path(apt_repo_dir) / "pool" / "main"
+    """Count .deb files in all distribution pools"""
+    pool_dir = Path(apt_repo_dir) / "pool"
     if not pool_dir.exists():
         return 0
-    return len(list(pool_dir.glob("*.deb")))
+    
+    # Count all .deb files in all distribution pools
+    total = 0
+    for dist_dir in pool_dir.iterdir():
+        if dist_dir.is_dir():
+            main_dir = dist_dir / "main"
+            if main_dir.exists():
+                total += len(list(main_dir.glob("*.deb")))
+    return total
+
+def get_distribution_packages(apt_repo_dir):
+    """Get package counts per distribution"""
+    pool_dir = Path(apt_repo_dir) / "pool"
+    distributions = {}
+    
+    if not pool_dir.exists():
+        return distributions
+    
+    for dist_dir in sorted(pool_dir.iterdir()):
+        if dist_dir.is_dir():
+            main_dir = dist_dir / "main"
+            if main_dir.exists():
+                count = len(list(main_dir.glob("*.deb")))
+                distributions[dist_dir.name] = count
+    
+    return distributions
 
 def main():
     if len(sys.argv) < 3:
@@ -32,6 +57,7 @@ def main():
     
     # Count packages
     package_count = count_packages(apt_repo_dir)
+    distributions = get_distribution_packages(apt_repo_dir)
     
     # Get generated date
     generated_date = datetime.now(datetime.UTC).strftime('%Y-%m-%d %H:%M:%S UTC') if hasattr(datetime, 'UTC') else datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S UTC')
@@ -47,6 +73,7 @@ def main():
         repo_name=repo_name,
         pages_url=pages_url,
         package_count=package_count,
+        distributions=distributions,
         generated_date=generated_date
     )
     

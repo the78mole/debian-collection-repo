@@ -227,32 +227,35 @@ gpg --verify dists/trixie/InRelease     # For Debian 13</pre>
         <h2>📋 Package Listing</h2>
         <p>View available packages by distribution and architecture:</p>
         <ul>
-            <li><strong>Ubuntu 22.04 (Jammy):</strong>
+            <li><strong>Ubuntu 22.04 (Jammy):</strong> {{ distributions.get('jammy', 0) }} packages
                 <ul>
                     <li>amd64: <a href="dists/jammy/main/binary-amd64/Packages">Packages</a> | <a href="dists/jammy/main/binary-amd64/Packages.gz">Packages.gz</a></li>
                     <li>arm64: <a href="dists/jammy/main/binary-arm64/Packages">Packages</a> | <a href="dists/jammy/main/binary-arm64/Packages.gz">Packages.gz</a></li>
+                    <li><a href="pool/jammy/main/" class="browse-link">Browse Packages →</a></li>
                 </ul>
             </li>
-            <li><strong>Ubuntu 24.04 (Noble):</strong>
+            <li><strong>Ubuntu 24.04 (Noble):</strong> {{ distributions.get('noble', 0) }} packages
                 <ul>
                     <li>amd64: <a href="dists/noble/main/binary-amd64/Packages">Packages</a> | <a href="dists/noble/main/binary-amd64/Packages.gz">Packages.gz</a></li>
                     <li>arm64: <a href="dists/noble/main/binary-arm64/Packages">Packages</a> | <a href="dists/noble/main/binary-arm64/Packages.gz">Packages.gz</a></li>
+                    <li><a href="pool/noble/main/" class="browse-link">Browse Packages →</a></li>
                 </ul>
             </li>
-            <li><strong>Debian 12 (Bookworm):</strong>
+            <li><strong>Debian 12 (Bookworm):</strong> {{ distributions.get('bookworm', 0) }} packages
                 <ul>
                     <li>amd64: <a href="dists/bookworm/main/binary-amd64/Packages">Packages</a> | <a href="dists/bookworm/main/binary-amd64/Packages.gz">Packages.gz</a></li>
                     <li>arm64: <a href="dists/bookworm/main/binary-arm64/Packages">Packages</a> | <a href="dists/bookworm/main/binary-arm64/Packages.gz">Packages.gz</a></li>
+                    <li><a href="pool/bookworm/main/" class="browse-link">Browse Packages →</a></li>
                 </ul>
             </li>
-            <li><strong>Debian 13 (Trixie):</strong>
+            <li><strong>Debian 13 (Trixie):</strong> {{ distributions.get('trixie', 0) }} packages
                 <ul>
                     <li>amd64: <a href="dists/trixie/main/binary-amd64/Packages">Packages</a> | <a href="dists/trixie/main/binary-amd64/Packages.gz">Packages.gz</a></li>
                     <li>arm64: <a href="dists/trixie/main/binary-arm64/Packages">Packages</a> | <a href="dists/trixie/main/binary-arm64/Packages.gz">Packages.gz</a></li>
+                    <li><a href="pool/trixie/main/" class="browse-link">Browse Packages →</a></li>
                 </ul>
             </li>
         </ul>
-        <a href="pool/main/" class="browse-link">Browse Package Pool →</a>
 
         <h2>🔄 Updates</h2>
         <p>This repository is automatically updated:</p>
@@ -272,7 +275,7 @@ curl -fsSL {{ pages_url }}/public.key | sudo gpg --dearmor -o /usr/share/keyring
 sudo apt update</pre>
 
         <h3>Package not found</h3>
-        <p>Check the <a href="dists/stable/main/binary-amd64/Packages">Packages</a> file to see all available packages. Make sure you've run <code>sudo apt update</code> after adding the repository.</p>
+        <p>Check the Packages files for each distribution to see all available packages. Make sure you've run <code>sudo apt update</code> after adding the repository.</p>
 
         <h2>ℹ️ About</h2>
         <p>This APT repository automatically collects and publishes Debian packages from multiple GitHub repositories. It's built using GitHub Actions and hosted on GitHub Pages.</p>
@@ -282,8 +285,7 @@ sudo apt update</pre>
         </ul>
 
         <div class="footer">
-            Generated on {{ generated_date }}<br>
-            Last updated: Check <a href="dists/stable/Release">Release</a> file for timestamp
+            Generated on {{ generated_date }}
         </div>
     </div>
 </body>
