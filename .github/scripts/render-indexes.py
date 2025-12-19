@@ -8,6 +8,7 @@ import sys
 import os
 from pathlib import Path
 from datetime import datetime
+from urllib.parse import quote
 from jinja2 import Environment, FileSystemLoader
 
 def format_size(size):
@@ -32,7 +33,10 @@ def generate_index(template, directory, apt_repo_root):
     directories = []
     for item in sorted(directory.iterdir()):
         if item.is_dir():
-            directories.append({'name': item.name})
+            directories.append({
+                'name': item.name,
+                'url': quote(item.name)
+            })
     
     # Get files (excluding index.html)
     files = []
@@ -43,6 +47,7 @@ def generate_index(template, directory, apt_repo_root):
             date = datetime.fromtimestamp(stat.st_mtime).strftime('%Y-%m-%d %H:%M')
             files.append({
                 'name': item.name,
+                'url': quote(item.name),
                 'size': size,
                 'date': date
             })

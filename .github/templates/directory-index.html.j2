@@ -27,10 +27,10 @@
         <tr><td><a href="../">../</a></td><td class="size">-</td><td class="date">-</td></tr>
         {% endif %}
         {% for dir in directories %}
-        <tr><td><a href="{{ dir.name }}/">{{ dir.name }}/</a></td><td class="size">-</td><td class="date">-</td></tr>
+        <tr><td><a href="{{ dir.url }}/">{{ dir.name }}/</a></td><td class="size">-</td><td class="date">-</td></tr>
         {% endfor %}
         {% for file in files %}
-        <tr><td><a href="{{ file.name }}">{{ file.name }}</a></td><td class="size">{{ file.size }}</td><td class="date">{{ file.date }}</td></tr>
+        <tr><td><a href="{{ file.url }}">{{ file.name }}</a></td><td class="size">{{ file.size }}</td><td class="date">{{ file.date }}</td></tr>
         {% endfor %}
     </table>
 </body>
