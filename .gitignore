@@ -6,6 +6,9 @@ downloads/
 *.tmp
 *.log
 
+# Act secrets
+.secrets
+
 # OS files
 .DS_Store
 Thumbs.db
