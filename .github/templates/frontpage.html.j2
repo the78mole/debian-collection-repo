@@ -193,10 +193,10 @@ sudo apt install &lt;package-name&gt;</pre>
         <h2>📂 Repository Structure</h2>
         <p>Browse the repository contents:</p>
         <ul>
-            <li><a href="pool/main/">pool/main/</a> - Package pool (all .deb files)</li>
             {% for dist in distributions %}
             <li><strong>{{ dist.display_name }}:</strong>{% if dist.package_count %} <span class="package-count">({{ dist.package_count }} packages)</span>{% endif %}</li>
             <ul>
+                <li><a href="pool/{{ dist.codename }}/main/">pool/{{ dist.codename }}/main/</a> - Package pool (.deb files)</li>
                 <li><a href="dists/{{ dist.codename }}/">dists/{{ dist.codename }}/</a> - Distribution metadata</li>
                 <li>{% for arch in dist.architectures %}<a href="dists/{{ dist.codename }}/main/binary-{{ arch }}/Packages">Packages ({{ arch }})</a>{% if not loop.last %} | {% endif %}{% endfor %}</li>
                 <li><a href="dists/{{ dist.codename }}/Release">Release</a> - Release metadata</li>
