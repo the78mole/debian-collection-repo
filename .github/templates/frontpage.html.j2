@@ -102,16 +102,43 @@
         }
         .browse-link {
             display: inline-block;
-            margin-top: 10px;
-            padding: 8px 16px;
+            padding: 6px 12px;
             background-color: #0066cc;
             color: white;
             border-radius: 4px;
             text-decoration: none;
+            font-size: 14px;
         }
         .browse-link:hover {
             background-color: #0052a3;
             text-decoration: none;
+        }
+        .package-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        .package-table th {
+            background-color: #f8f9fa;
+            padding: 12px;
+            text-align: left;
+            border-bottom: 2px solid #dee2e6;
+            font-weight: 600;
+        }
+        .package-table td {
+            padding: 12px;
+            border-bottom: 1px solid #dee2e6;
+        }
+        .package-table tr:hover {
+            background-color: #f8f9fa;
+        }
+        .package-table td a {
+            margin-right: 8px;
+        }
+        .package-count {
+            color: #666;
+            font-size: 14px;
+            margin-left: 8px;
         }
     </style>
 </head>
@@ -226,36 +253,66 @@ gpg --verify dists/trixie/InRelease     # For Debian 13</pre>
 
         <h2>📋 Package Listing</h2>
         <p>View available packages by distribution and architecture:</p>
-        <ul>
-            <li><strong>Ubuntu 22.04 (Jammy):</strong> {{ distributions.get('jammy', 0) }} packages
-                <ul>
-                    <li>amd64: <a href="dists/jammy/main/binary-amd64/Packages">Packages</a> | <a href="dists/jammy/main/binary-amd64/Packages.gz">Packages.gz</a></li>
-                    <li>arm64: <a href="dists/jammy/main/binary-arm64/Packages">Packages</a> | <a href="dists/jammy/main/binary-arm64/Packages.gz">Packages.gz</a></li>
-                    <li><a href="pool/jammy/main/" class="browse-link">Browse Packages →</a></li>
-                </ul>
-            </li>
-            <li><strong>Ubuntu 24.04 (Noble):</strong> {{ distributions.get('noble', 0) }} packages
-                <ul>
-                    <li>amd64: <a href="dists/noble/main/binary-amd64/Packages">Packages</a> | <a href="dists/noble/main/binary-amd64/Packages.gz">Packages.gz</a></li>
-                    <li>arm64: <a href="dists/noble/main/binary-arm64/Packages">Packages</a> | <a href="dists/noble/main/binary-arm64/Packages.gz">Packages.gz</a></li>
-                    <li><a href="pool/noble/main/" class="browse-link">Browse Packages →</a></li>
-                </ul>
-            </li>
-            <li><strong>Debian 12 (Bookworm):</strong> {{ distributions.get('bookworm', 0) }} packages
-                <ul>
-                    <li>amd64: <a href="dists/bookworm/main/binary-amd64/Packages">Packages</a> | <a href="dists/bookworm/main/binary-amd64/Packages.gz">Packages.gz</a></li>
-                    <li>arm64: <a href="dists/bookworm/main/binary-arm64/Packages">Packages</a> | <a href="dists/bookworm/main/binary-arm64/Packages.gz">Packages.gz</a></li>
-                    <li><a href="pool/bookworm/main/" class="browse-link">Browse Packages →</a></li>
-                </ul>
-            </li>
-            <li><strong>Debian 13 (Trixie):</strong> {{ distributions.get('trixie', 0) }} packages
-                <ul>
-                    <li>amd64: <a href="dists/trixie/main/binary-amd64/Packages">Packages</a> | <a href="dists/trixie/main/binary-amd64/Packages.gz">Packages.gz</a></li>
-                    <li>arm64: <a href="dists/trixie/main/binary-arm64/Packages">Packages</a> | <a href="dists/trixie/main/binary-arm64/Packages.gz">Packages.gz</a></li>
-                    <li><a href="pool/trixie/main/" class="browse-link">Browse Packages →</a></li>
-                </ul>
-            </li>
-        </ul>
+        <table class="package-table">
+            <thead>
+                <tr>
+                    <th>Distribution</th>
+                    <th>amd64</th>
+                    <th>arm64</th>
+                    <th>Browse Packages</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>Ubuntu 22.04 (Jammy)</strong><span class="package-count">{{ distributions.get('jammy', 0) }} packages</span></td>
+                    <td>
+                        <a href="dists/jammy/main/binary-amd64/Packages">Packages</a> |
+                        <a href="dists/jammy/main/binary-amd64/Packages.gz">Packages.gz</a>
+                    </td>
+                    <td>
+                        <a href="dists/jammy/main/binary-arm64/Packages">Packages</a> |
+                        <a href="dists/jammy/main/binary-arm64/Packages.gz">Packages.gz</a>
+                    </td>
+                    <td><a href="pool/jammy/main/" class="browse-link">Browse →</a></td>
+                </tr>
+                <tr>
+                    <td><strong>Ubuntu 24.04 (Noble)</strong><span class="package-count">{{ distributions.get('noble', 0) }} packages</span></td>
+                    <td>
+                        <a href="dists/noble/main/binary-amd64/Packages">Packages</a> |
+                        <a href="dists/noble/main/binary-amd64/Packages.gz">Packages.gz</a>
+                    </td>
+                    <td>
+                        <a href="dists/noble/main/binary-arm64/Packages">Packages</a> |
+                        <a href="dists/noble/main/binary-arm64/Packages.gz">Packages.gz</a>
+                    </td>
+                    <td><a href="pool/noble/main/" class="browse-link">Browse →</a></td>
+                </tr>
+                <tr>
+                    <td><strong>Debian 12 (Bookworm)</strong><span class="package-count">{{ distributions.get('bookworm', 0) }} packages</span></td>
+                    <td>
+                        <a href="dists/bookworm/main/binary-amd64/Packages">Packages</a> |
+                        <a href="dists/bookworm/main/binary-amd64/Packages.gz">Packages.gz</a>
+                    </td>
+                    <td>
+                        <a href="dists/bookworm/main/binary-arm64/Packages">Packages</a> |
+                        <a href="dists/bookworm/main/binary-arm64/Packages.gz">Packages.gz</a>
+                    </td>
+                    <td><a href="pool/bookworm/main/" class="browse-link">Browse →</a></td>
+                </tr>
+                <tr>
+                    <td><strong>Debian 13 (Trixie)</strong><span class="package-count">{{ distributions.get('trixie', 0) }} packages</span></td>
+                    <td>
+                        <a href="dists/trixie/main/binary-amd64/Packages">Packages</a> |
+                        <a href="dists/trixie/main/binary-amd64/Packages.gz">Packages.gz</a>
+                    </td>
+                    <td>
+                        <a href="dists/trixie/main/binary-arm64/Packages">Packages</a> |
+                        <a href="dists/trixie/main/binary-arm64/Packages.gz">Packages.gz</a>
+                    </td>
+                    <td><a href="pool/trixie/main/" class="browse-link">Browse →</a></td>
+                </tr>
+            </tbody>
+        </table>
 
         <h2>🔄 Updates</h2>
         <p>This repository is automatically updated:</p>
