@@ -31,11 +31,67 @@ echo "Testing on $BASE_IMAGE ($PLATFORM)"
 # Get the directory where this script is located
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-# Run test in container
-docker run --platform="$PLATFORM" --rm \
-  -v "${SCRIPT_DIR}/test-installation.sh:/test-install.sh:ro" \
-  "$BASE_IMAGE" \
-  /bin/bash /test-install.sh \
-  "$REPO_URL" \
-  "$CODENAME" \
-  "$REPO_NAME"
+# Get list of packages from repository
+echo "=== Fetching package list from repository ==="
+chmod +x "${SCRIPT_DIR}/get-packages-from-repo.sh"
+PACKAGES=$("${SCRIPT_DIR}/get-packages-from-repo.sh" "$REPO_URL" "$CODENAME" "$ARCH" 2>/dev/null) || {
+  echo "⚠️  No packages found in repository for ${CODENAME}/${ARCH}"
+  echo "Running basic repository verification instead..."
+  
+  docker run --platform="$PLATFORM" --rm \
+    -v "${SCRIPT_DIR}/test-installation.sh:/test-install.sh:ro" \
+    "$BASE_IMAGE" \
+    /bin/bash /test-install.sh \
+    "$REPO_URL" \
+    "$CODENAME" \
+    "$REPO_NAME"
+  
+  exit 0
+}
+
+# Limit to first 5 packages for testing
+PACKAGES=$(echo "$PACKAGES" | head -5)
+PACKAGE_COUNT=$(echo "$PACKAGES" | wc -l)
+
+echo "Found ${PACKAGE_COUNT} packages to test"
+echo "$PACKAGES"
+echo ""
+
+# Test each package in a fresh container
+SUCCESS_COUNT=0
+FAIL_COUNT=0
+
+for pkg in $PACKAGES; do
+  echo "=========================================="
+  echo "Testing package: $pkg in fresh container"
+  echo "=========================================="
+  
+  if docker run --platform="$PLATFORM" --rm \
+    -v "${SCRIPT_DIR}/test-installation.sh:/test-install.sh:ro" \
+    "$BASE_IMAGE" \
+    /bin/bash /test-install.sh \
+    "$REPO_URL" \
+    "$CODENAME" \
+    "$REPO_NAME" \
+    "$pkg"; then
+    
+    echo "✅ Package $pkg: SUCCESS"
+    ((SUCCESS_COUNT++))
+  else
+    echo "❌ Package $pkg: FAILED"
+    ((FAIL_COUNT++))
+  fi
+  
+  echo ""
+done
+
+echo "=========================================="
+echo "Test Summary"
+echo "=========================================="
+echo "Total packages tested: $((SUCCESS_COUNT + FAIL_COUNT))"
+echo "Successful: $SUCCESS_COUNT"
+echo "Failed: $FAIL_COUNT"
+
+if [ $FAIL_COUNT -gt 0 ]; then
+  exit 1
+fi

@@ -4,12 +4,13 @@ set -e
 REPO_URL="$1"
 CODENAME="$2"
 REPO_NAME="$3"
+PACKAGE_NAME="${4:-}"  # Optional: specific package to test
 
 echo "=== Updating package lists ==="
 apt-get update -qq
 
 echo "=== Installing dependencies ==="
-apt-get install -y -qq curl gnupg ca-certificates gzip
+apt-get install -y -qq curl gnupg ca-certificates
 
 echo "=== Adding repository key ==="
 curl -fsSL "${REPO_URL}/public.key" -o /tmp/repo.key
@@ -35,55 +36,52 @@ cat /etc/apt/sources.list.d/${REPO_NAME}.list
 echo "=== Updating package lists with new repository ==="
 apt-get update -qq
 
-echo "=== Fetching packages from repository ==="
-# Hole die Packages-Datei direkt aus dem Repository
-ARCH=$(dpkg --print-architecture)
-PACKAGES_URL="${REPO_URL}/dists/${CODENAME}/main/binary-${ARCH}/Packages"
-
-echo "Downloading package list from: ${PACKAGES_URL}"
-curl -fsSL "${PACKAGES_URL}" -o /tmp/packages.list || {
-  echo "Error: Could not download Packages file"
-  echo "Trying gzipped version..."
-  curl -fsSL "${PACKAGES_URL}.gz" -o /tmp/packages.list.gz && gunzip /tmp/packages.list.gz || {
-    echo "Error: No Packages file found for ${CODENAME}/${ARCH}"
-    exit 0
-  }
-}
-
-# Extrahiere Paketnamen aus der Packages-Datei
-PACKAGES=$(grep '^Package: ' /tmp/packages.list | awk '{print $2}' | head -5)
-
-if [ -z "$PACKAGES" ]; then
-  echo "Warning: No packages found in repository for ${CODENAME} (${ARCH})"
-  exit 0
+if [ -n "$PACKAGE_NAME" ]; then
+  # Test a specific package
+  echo "=== Testing installation of: $PACKAGE_NAME ==="
+  
+  if ! apt-cache show "$PACKAGE_NAME" >/dev/null 2>&1; then
+    echo "❌ Package $PACKAGE_NAME not available in repository"
+    exit 1
+  fi
+  
+  echo "📦 Installing $PACKAGE_NAME..."
+  if apt-get install -y "$PACKAGE_NAME"; then
+    echo "✅ Successfully installed $PACKAGE_NAME"
+    
+    echo ""
+    echo "Package info:"
+    dpkg -l | grep "$PACKAGE_NAME" || true
+    
+    echo ""
+    echo "Installed files (first 20):"
+    dpkg -L "$PACKAGE_NAME" | head -20 || true
+    
+    echo ""
+    echo "Dependencies:"
+    apt-cache depends "$PACKAGE_NAME" || true
+    
+    echo ""
+    echo "✅ Package test completed successfully"
+  else
+    echo "❌ Failed to install $PACKAGE_NAME"
+    echo "⚠️  This might indicate missing or incorrect dependencies!"
+    exit 1
+  fi
+else
+  # No specific package - just verify repository is accessible
+  echo "=== Repository verification ==="
+  ARCH=$(dpkg --print-architecture)
+  PACKAGES_URL="${REPO_URL}/dists/${CODENAME}/main/binary-${ARCH}/Packages"
+  
+  if curl -fsSL "${PACKAGES_URL}" -o /tmp/packages.list 2>/dev/null; then
+    PACKAGE_COUNT=$(grep -c '^Package: ' /tmp/packages.list || echo 0)
+    echo "✅ Repository accessible, found ${PACKAGE_COUNT} packages"
+  elif curl -fsSL "${PACKAGES_URL}.gz" >/dev/null 2>&1; then
+    echo "✅ Repository accessible (gzipped Packages file)"
+  else
+    echo "⚠️  No Packages file found for ${CODENAME}/${ARCH}"
+  fi
 fi
 
-echo "=== Found packages in repository ==="
-echo "$PACKAGES"
-
-# Installiere jedes Paket einzeln und teste es
-for pkg in $PACKAGES; do
-  echo "--- Testing package: $pkg ---"
-  
-  # Prüfe ob Paket verfügbar ist
-  if apt-cache show "$pkg" >/dev/null 2>&1; then
-    echo "Installing $pkg..."
-    apt-get install -y -qq "$pkg" || {
-      echo "Failed to install $pkg"
-      continue
-    }
-    
-    echo "✓ Successfully installed $pkg"
-    
-    # Zeige Paketinformationen
-    dpkg -l | grep "$pkg" || true
-    
-    # Optional: Teste ob Paket-Dateien vorhanden sind
-    dpkg -L "$pkg" | head -10 || true
-  else
-    echo "Package $pkg not available in repository"
-  fi
-  echo ""
-done
-
-echo "=== Installation test completed ==="
+echo "=== Test completed ==="
