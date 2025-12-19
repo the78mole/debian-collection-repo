@@ -108,7 +108,9 @@ jobs:
           echo ""
           echo "Package matrix generated:"
           echo "$MATRIX_JSON" | jq .
-          echo "matrix=$MATRIX_JSON" >> $GITHUB_OUTPUT
+          
+          # Output as single line for GitHub Actions
+          echo "matrix=$(echo "$MATRIX_JSON" | jq -c .)" >> $GITHUB_OUTPUT
   
   test-installation:
     runs-on: ubuntu-latest
