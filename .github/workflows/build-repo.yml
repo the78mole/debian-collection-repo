@@ -12,6 +12,8 @@ on:
       - 'repos.json'
       - '.github/workflows/build-repo.yml'
       - '.github/scripts/*.sh'
+      - '.github/scripts/*.py'
+      - '.github/templates/*.j2'
 
 permissions:
   contents: read
