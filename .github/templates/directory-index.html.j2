@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Index of /{{ relative_path }}</title>
+    <style>
+        body { font-family: monospace; margin: 20px; }
+        h1 { font-size: 18px; }
+        table { border-collapse: collapse; width: 100%; }
+        th { text-align: left; padding: 8px; background-color: #f0f0f0; }
+        td { padding: 8px; }
+        tr:hover { background-color: #f5f5f5; }
+        a { text-decoration: none; color: #0066cc; }
+        a:hover { text-decoration: underline; }
+        .size { text-align: right; }
+        .date { white-space: nowrap; }
+    </style>
+</head>
+<body>
+    <h1>Index of /{{ relative_path }}</h1>
+    <table>
+        <tr>
+            <th>Name</th>
+            <th class="size">Size</th>
+            <th class="date">Last Modified</th>
+        </tr>
+        {% if show_parent %}
+        <tr><td><a href="../">../</a></td><td class="size">-</td><td class="date">-</td></tr>
+        {% endif %}
+        {% for dir in directories %}
+        <tr><td><a href="{{ dir.name }}/">{{ dir.name }}/</a></td><td class="size">-</td><td class="date">-</td></tr>
+        {% endfor %}
+        {% for file in files %}
+        <tr><td><a href="{{ file.name }}">{{ file.name }}</a></td><td class="size">{{ file.size }}</td><td class="date">{{ file.date }}</td></tr>
+        {% endfor %}
+    </table>
+</body>
+</html>
