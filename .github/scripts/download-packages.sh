@@ -40,10 +40,10 @@ while IFS= read -r repo; do
     fi
 
     # Download all .deb files from the release
-    echo "$release_info" | jq -r '.assets[]? | select(.name | endswith(".deb")) | .browser_download_url' | while read url; do
+    echo "$release_info" | jq -r '.assets[]? | select(.name | endswith(".deb")) | "\(.browser_download_url)|\(.name)"' | while IFS='|' read url filename; do
         if [ -n "$url" ]; then
-            echo "Downloading $url"
-            (cd "$DOWNLOAD_DIR" && curl -L -O -H "Authorization: token $GITHUB_TOKEN" "$url")
+            echo "Downloading $filename from $url"
+            curl -L -o "$DOWNLOAD_DIR/$filename" -H "Authorization: token $GITHUB_TOKEN" "$url"
         fi
     done
 done <<< "$repos"
