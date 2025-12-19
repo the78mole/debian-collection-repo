@@ -49,6 +49,41 @@ Edit `repos.json` to add repositories to collect packages from:
 }
 ```
 
+See [REPOS_CONFIG.md](REPOS_CONFIG.md) for detailed configuration options.
+
+### Configuring Distributions and Architectures
+
+Edit `distros.yaml` to configure which distributions and architectures to support:
+
+```yaml
+distributions:
+  - distro: ubuntu
+    version: "22.04"
+    codename: jammy
+    display_name: "Ubuntu 22.04 LTS (Jammy Jellyfish)"
+    architectures: [amd64, arm64]
+    matches: [ubuntu22.04, ubuntu-22.04, jammy]
+    eol: "2027-04"
+  
+  - distro: debian
+    version: "12"
+    codename: bookworm
+    display_name: "Debian 12 (Bookworm)"
+    architectures: [amd64, arm64, armhf]
+    matches: [debian12, debian-12, bookworm]
+    eol: "2026-06"
+
+components:
+  - main
+```
+
+Each distribution can define its own supported architectures. See [DISTROS_CONFIG.md](DISTROS_CONFIG.md) for detailed configuration options.
+
+This configuration is used by:
+- Repository build workflow (directory structure)
+- Package installation tests (test matrix)
+- Front-end generation (documentation)
+
 ### Setting Up GPG Signing
 
 1. Generate a GPG key (if you don't have one):

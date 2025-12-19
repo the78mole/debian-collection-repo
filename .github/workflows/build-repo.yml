@@ -10,6 +10,7 @@ on:
       - main
     paths:
       - 'repos.json'
+      - 'distros.yaml'
       - '.github/workflows/build-repo.yml'
       - '.github/scripts/*.sh'
       - '.github/scripts/*.py'
@@ -38,24 +39,31 @@ jobs:
 
       - name: Setup directories
         run: |
-          # Define supported distributions (Ubuntu + Debian)
-          DISTRIBUTIONS="jammy noble bookworm trixie"  # Ubuntu 22.04, 24.04, Debian 12, 13
-          ARCHITECTURES="amd64 arm64"
+          # Load distributions from distros.yaml
+          source .github/scripts/load-distros.sh
           
           mkdir -p downloads
           
           # Create directory structure for each distribution and architecture
           for dist in $DISTRIBUTIONS; do
-            mkdir -p "apt-repo/pool/$dist/main"
-            for arch in $ARCHITECTURES; do
-              mkdir -p "apt-repo/dists/$dist/main/binary-$arch"
+            # Get architectures for this specific distribution
+            DIST_ARCHS=$(get_architectures "$dist")
+            
+            for component in $COMPONENTS; do
+              mkdir -p "apt-repo/pool/$dist/$component"
+            done
+            for arch in $DIST_ARCHS; do
+              for component in $COMPONENTS; do
+                mkdir -p "apt-repo/dists/$dist/$component/binary-$arch"
+              done
             done
           done
 
       - name: Install dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y dpkg-dev gnupg jq curl
+          sudo apt-get install -y dpkg-dev gnupg jq curl python3-pip
+          pip3 install pyyaml jinja2
 
       - name: Download packages from repositories
         env:

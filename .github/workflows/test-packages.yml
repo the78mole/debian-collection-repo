@@ -1,0 +1,100 @@
+name: Test Package Installation
+
+on:
+  workflow_dispatch:
+  workflow_run:
+    workflows: ["Build APT Repository"]
+    types:
+      - completed
+  pull_request:
+    paths:
+      - 'repos.json'
+      - 'distros.yaml'
+      - '.github/workflows/test-packages.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  generate-matrix:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
+      - name: Install PyYAML
+        run: pip3 install pyyaml
+      
+      - name: Generate matrix from distros.yaml
+        id: set-matrix
+        run: |
+          MATRIX=$(python3 .github/scripts/generate-matrix.py)
+          echo "matrix=$MATRIX" >> $GITHUB_OUTPUT
+  
+  test-installation:
+    runs-on: ubuntu-latest
+    needs: generate-matrix
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
+    
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJson(needs.generate-matrix.outputs.matrix) }}
+    
+    name: Test ${{ matrix.distro }} ${{ matrix.version }} (${{ matrix.arch }})
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
+      - name: Set up QEMU for multi-architecture support
+        if: matrix.arch == 'arm64'
+        uses: docker/setup-qemu-action@v3
+        with:
+          platforms: arm64
+      
+      - name: Get repository URL
+        id: repo-url
+        run: |
+          REPO_URL="https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}"
+          echo "url=$REPO_URL" >> $GITHUB_OUTPUT
+          echo "Repository URL: $REPO_URL"
+      
+      - name: Make scripts executable
+        run: |
+          chmod +x .github/scripts/run-container-test.sh
+          chmod +x .github/scripts/test-installation.sh
+      
+      - name: Test installation in container
+        run: |
+          .github/scripts/run-container-test.sh \
+            "${{ matrix.distro }}" \
+            "${{ matrix.version }}" \
+            "${{ matrix.codename }}" \
+            "${{ matrix.arch }}" \
+            "${{ steps.repo-url.outputs.url }}" \
+            "${{ github.event.repository.name }}"
+      
+      - name: Report results
+        if: always()
+        run: |
+          if [ "${{ job.status }}" = "success" ]; then
+            echo "✅ Installation test PASSED for ${{ matrix.distro }} ${{ matrix.version }} (${{ matrix.arch }})"
+          else
+            echo "❌ Installation test FAILED for ${{ matrix.distro }} ${{ matrix.version }} (${{ matrix.arch }})"
+          fi
+  
+  summary:
+    runs-on: ubuntu-latest
+    needs: test-installation
+    if: always()
+    
+    steps:
+      - name: Test Summary
+        run: |
+          echo "## Package Installation Test Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Test workflow completed for all distributions and architectures." >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Check individual job results above for details." >> $GITHUB_STEP_SUMMARY

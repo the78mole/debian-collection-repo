@@ -1,0 +1,35 @@
+distributions:
+  - distro: ubuntu
+    version: "22.04"
+    codename: jammy
+    display_name: "Ubuntu 22.04 LTS (Jammy Jellyfish)"
+    architectures: [amd64, arm64]
+    matches: [ubuntu22.04, ubuntu-22.04, jammy]
+    eol: "2027-04"
+  
+  - distro: ubuntu
+    version: "24.04"
+    codename: noble
+    display_name: "Ubuntu 24.04 LTS (Noble Numbat)"
+    architectures: [amd64, arm64]
+    matches: [ubuntu24.04, ubuntu-24.04, noble]
+    eol: "2029-04"
+  
+  - distro: debian
+    version: "12"
+    codename: bookworm
+    display_name: "Debian 12 (Bookworm)"
+    architectures: [amd64, arm64]
+    matches: [debian12, debian-12, bookworm]
+    eol: "2026-06"
+  
+  - distro: debian
+    version: "13"
+    codename: trixie
+    display_name: "Debian 13 (Trixie)"
+    architectures: [amd64, arm64]
+    matches: [debian13, debian-13, trixie]
+    eol: "2028-06"
+
+components:
+  - main
