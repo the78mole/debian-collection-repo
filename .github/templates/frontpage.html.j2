@@ -257,14 +257,16 @@ gpg --verify dists/trixie/InRelease     # For Debian 13</pre>
             <thead>
                 <tr>
                     <th>Distribution</th>
+                    <th>Packages</th>
                     <th>amd64</th>
                     <th>arm64</th>
-                    <th>Browse Packages</th>
+                    <th>Browse</th>
                 </tr>
             </thead>
             <tbody>
                 <tr>
-                    <td><strong>Ubuntu 22.04 (Jammy)</strong><span class="package-count">{{ distributions.get('jammy', 0) }} packages</span></td>
+                    <td><strong>Ubuntu 22.04 (Jammy)</strong></td>
+                    <td>{{ distributions.get('jammy', 0) }}</td>
                     <td>
                         <a href="dists/jammy/main/binary-amd64/Packages">Packages</a> |
                         <a href="dists/jammy/main/binary-amd64/Packages.gz">Packages.gz</a>
@@ -276,7 +278,8 @@ gpg --verify dists/trixie/InRelease     # For Debian 13</pre>
                     <td><a href="pool/jammy/main/" class="browse-link">Browse →</a></td>
                 </tr>
                 <tr>
-                    <td><strong>Ubuntu 24.04 (Noble)</strong><span class="package-count">{{ distributions.get('noble', 0) }} packages</span></td>
+                    <td><strong>Ubuntu 24.04 (Noble)</strong></td>
+                    <td>{{ distributions.get('noble', 0) }}</td>
                     <td>
                         <a href="dists/noble/main/binary-amd64/Packages">Packages</a> |
                         <a href="dists/noble/main/binary-amd64/Packages.gz">Packages.gz</a>
@@ -288,7 +291,8 @@ gpg --verify dists/trixie/InRelease     # For Debian 13</pre>
                     <td><a href="pool/noble/main/" class="browse-link">Browse →</a></td>
                 </tr>
                 <tr>
-                    <td><strong>Debian 12 (Bookworm)</strong><span class="package-count">{{ distributions.get('bookworm', 0) }} packages</span></td>
+                    <td><strong>Debian 12 (Bookworm)</strong></td>
+                    <td>{{ distributions.get('bookworm', 0) }}</td>
                     <td>
                         <a href="dists/bookworm/main/binary-amd64/Packages">Packages</a> |
                         <a href="dists/bookworm/main/binary-amd64/Packages.gz">Packages.gz</a>
@@ -300,7 +304,8 @@ gpg --verify dists/trixie/InRelease     # For Debian 13</pre>
                     <td><a href="pool/bookworm/main/" class="browse-link">Browse →</a></td>
                 </tr>
                 <tr>
-                    <td><strong>Debian 13 (Trixie)</strong><span class="package-count">{{ distributions.get('trixie', 0) }} packages</span></td>
+                    <td><strong>Debian 13 (Trixie)</strong></td>
+                    <td>{{ distributions.get('trixie', 0) }}</td>
                     <td>
                         <a href="dists/trixie/main/binary-amd64/Packages">Packages</a> |
                         <a href="dists/trixie/main/binary-amd64/Packages.gz">Packages.gz</a>
