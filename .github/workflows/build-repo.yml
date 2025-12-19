@@ -65,13 +65,16 @@ jobs:
           fi
 
       - name: Import GPG key
-        if: ${{ secrets.GPG_PRIVATE_KEY }}
         env:
           GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
         run: |
-          echo "$GPG_PRIVATE_KEY" | gpg --import --batch --yes
-          KEY_ID=$(gpg --list-secret-keys --keyid-format LONG | grep sec | head -1 | awk '{print $2}' | cut -d'/' -f2)
-          echo "GPG_KEY_ID=$KEY_ID" >> $GITHUB_ENV
+          if [ -n "$GPG_PRIVATE_KEY" ]; then
+            echo "$GPG_PRIVATE_KEY" | gpg --import --batch --yes
+            KEY_ID=$(gpg --list-secret-keys --keyid-format LONG | grep sec | head -1 | awk '{print $2}' | cut -d'/' -f2)
+            echo "GPG_KEY_ID=$KEY_ID" >> $GITHUB_ENV
+          else
+            echo "No GPG key provided, skipping GPG key import"
+          fi
 
       - name: Generate APT repository metadata
         run: .github/scripts/generate-metadata.sh apt-repo
