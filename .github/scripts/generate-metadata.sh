@@ -25,14 +25,16 @@ for dist in $DISTRIBUTIONS; do
     echo ""
     echo "=== Processing distribution: $dist ==="
     
+    POOL_DIR="pool/$dist/main"
+    
     for arch in $ARCHITECTURES; do
         echo "  Processing architecture: $arch"
         
-        # Find packages for this architecture
-        if [ -n "$(ls -A pool/main/*_${arch}.deb 2>/dev/null)" ]; then
-            dpkg-scanpackages --arch "$arch" --multiversion pool/main > "dists/$dist/main/binary-${arch}/Packages"
+        # Find packages for this architecture in this distribution's pool
+        if [ -n "$(ls -A ${POOL_DIR}/*_${arch}.deb 2>/dev/null)" ]; then
+            dpkg-scanpackages --arch "$arch" --multiversion "$POOL_DIR" > "dists/$dist/main/binary-${arch}/Packages"
             gzip -k -f "dists/$dist/main/binary-${arch}/Packages"
-            echo "    Found $(ls pool/main/*_${arch}.deb 2>/dev/null | wc -l) packages for $arch"
+            echo "    Found $(ls ${POOL_DIR}/*_${arch}.deb 2>/dev/null | wc -l) packages for $arch"
         else
             echo "    No packages found for $arch"
             touch "dists/$dist/main/binary-${arch}/Packages"
@@ -41,11 +43,11 @@ for dist in $DISTRIBUTIONS; do
     done
     
     # Also handle architecture-independent packages (all)
-    if [ -n "$(ls -A pool/main/*_all.deb 2>/dev/null)" ]; then
-        echo "  Found architecture-independent packages"
+    if [ -n "$(ls -A ${POOL_DIR}/*_all.deb 2>/dev/null)" ]; then
+        echo "  Found $(ls ${POOL_DIR}/*_all.deb 2>/dev/null | wc -l) architecture-independent packages"
         # Add 'all' packages to both architectures
         for arch in $ARCHITECTURES; do
-            dpkg-scanpackages --arch "$arch" --multiversion pool/main >> "dists/$dist/main/binary-${arch}/Packages"
+            dpkg-scanpackages --arch "$arch" --multiversion "$POOL_DIR" >> "dists/$dist/main/binary-${arch}/Packages"
             gzip -k -f "dists/$dist/main/binary-${arch}/Packages"
         done
     fi

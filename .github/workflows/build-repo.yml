@@ -40,11 +40,11 @@ jobs:
           DISTRIBUTIONS="jammy noble bookworm trixie"  # Ubuntu 22.04, 24.04, Debian 12, 13
           ARCHITECTURES="amd64 arm64"
           
-          mkdir -p apt-repo/pool/main
           mkdir -p downloads
           
           # Create directory structure for each distribution and architecture
           for dist in $DISTRIBUTIONS; do
+            mkdir -p "apt-repo/pool/$dist/main"
             for arch in $ARCHITECTURES; do
               mkdir -p "apt-repo/dists/$dist/main/binary-$arch"
             done
@@ -60,15 +60,10 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: .github/scripts/download-packages.sh repos.json
 
-      - name: Copy packages to pool
+      - name: Organize packages by distribution
         run: |
-          if [ -n "$(ls -A downloads/*.deb 2>/dev/null)" ]; then
-            cp downloads/*.deb apt-repo/pool/main/
-            echo "Copied $(ls downloads/*.deb 2>/dev/null | wc -l) packages"
-          else
-            echo "No packages found to copy"
-            touch apt-repo/dists/stable/main/binary-amd64/Packages
-          fi
+          chmod +x .github/scripts/organize-packages.sh
+          .github/scripts/organize-packages.sh downloads apt-repo
 
       - name: Import GPG key
         env:
