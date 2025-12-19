@@ -65,7 +65,7 @@ jobs:
           fi
 
       - name: Import GPG key
-        if: ${{ secrets.GPG_PRIVATE_KEY }}
+        if: ${{ secrets.GPG_PRIVATE_KEY != '' }}
         env:
           GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
         run: |
