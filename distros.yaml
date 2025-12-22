@@ -11,7 +11,7 @@ distributions:
     version: "24.04"
     codename: noble
     display_name: "Ubuntu 24.04 LTS (Noble Numbat)"
-    architectures: [amd64, arm64]
+    architectures: [amd64, arm64, riscv64]
     matches: [ubuntu24.04, ubuntu-24.04, noble]
     eol: "2029-04"
   
@@ -27,7 +27,7 @@ distributions:
     version: "13"
     codename: trixie
     display_name: "Debian 13 (Trixie)"
-    architectures: [amd64, arm64]
+    architectures: [amd64, arm64, riscv64]
     matches: [debian13, debian-13, trixie]
     eol: "2028-06"
 
