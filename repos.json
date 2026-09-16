@@ -4,6 +4,11 @@
       "owner": "the78mole",
       "repo": "libcarla",
       "description": "CARLA library packages"
+    },
+    {
+      "owner": "the78mole",
+      "repo": "pbs-client-apt",
+      "description": "Proxmox Backup Client: Ubuntu builds and mirrored Proxmox packages for Debian / Raspberry Pi OS"
     }
   ]
 }

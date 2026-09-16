@@ -16,8 +16,9 @@ if [ -z "$GPG_KEY_ID" ]; then
     exit 1
 fi
 
-# Define supported distributions
-DISTRIBUTIONS="jammy noble bookworm trixie"
+# Load supported distributions from distros.yaml
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "$SCRIPT_DIR/load-distros.sh"
 
 echo "Signing Release files with GPG key $GPG_KEY_ID..."
 

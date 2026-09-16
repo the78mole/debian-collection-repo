@@ -11,11 +11,11 @@ if [ ! -d "$APT_REPO" ]; then
     exit 1
 fi
 
-cd "$APT_REPO"
+# Load supported distributions and architectures from distros.yaml
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "$SCRIPT_DIR/load-distros.sh"
 
-# Define supported distributions and architectures
-DISTRIBUTIONS="jammy noble bookworm trixie"  # Ubuntu 22.04, 24.04, Debian 12, 13
-ARCHITECTURES="amd64 arm64"
+cd "$APT_REPO"
 
 echo "Generating repository for distributions: $DISTRIBUTIONS"
 echo "Supporting architectures: $ARCHITECTURES"
@@ -26,8 +26,9 @@ for dist in $DISTRIBUTIONS; do
     echo "=== Processing distribution: $dist ==="
     
     POOL_DIR="pool/$dist/main"
+    DIST_ARCHS="$(get_architectures "$dist")"
     
-    for arch in $ARCHITECTURES; do
+    for arch in $DIST_ARCHS; do
         echo "  Processing architecture: $arch"
         
         # Find packages for this architecture in this distribution's pool
@@ -46,7 +47,7 @@ for dist in $DISTRIBUTIONS; do
     if [ -n "$(ls -A ${POOL_DIR}/*_all.deb 2>/dev/null)" ]; then
         echo "  Found $(ls ${POOL_DIR}/*_all.deb 2>/dev/null | wc -l) architecture-independent packages"
         # Add 'all' packages to both architectures
-        for arch in $ARCHITECTURES; do
+        for arch in $DIST_ARCHS; do
             dpkg-scanpackages --arch "$arch" --multiversion "$POOL_DIR" >> "dists/$dist/main/binary-${arch}/Packages"
             gzip -k -f "dists/$dist/main/binary-${arch}/Packages"
         done
@@ -57,30 +58,15 @@ for dist in $DISTRIBUTIONS; do
     cd "dists/$dist"
     
     # Determine distribution details
-    case $dist in
-        jammy)
-            dist_name="Ubuntu 22.04 LTS (Jammy Jellyfish)"
-            ;;
-        noble)
-            dist_name="Ubuntu 24.04 LTS (Noble Numbat)"
-            ;;
-        bookworm)
-            dist_name="Debian 12 (Bookworm)"
-            ;;
-        trixie)
-            dist_name="Debian 13 (Trixie)"
-            ;;
-        *)
-            dist_name="$dist"
-            ;;
-    esac
+    dist_name="$(get_display_name "$dist")"
+    dist_name="${dist_name:-$dist}"
     
     cat > Release <<EOF
 Origin: ${REPO_NAME:-debian-collection-repo}
 Label: ${REPO_NAME:-debian-collection-repo} APT Repository
 Suite: $dist
 Codename: $dist
-Architectures: amd64 arm64
+Architectures: $DIST_ARCHS
 Components: main
 Description: Multi-architecture Debian package repository for $dist_name
 Date: $(date -Ru)

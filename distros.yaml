@@ -15,6 +15,14 @@ distributions:
     matches: [ubuntu24.04, ubuntu-24.04, noble]
     eol: "2029-04"
   
+  - distro: ubuntu
+    version: "26.04"
+    codename: resolute
+    display_name: "Ubuntu 26.04 LTS (Resolute Raccoon)"
+    architectures: [amd64, arm64]
+    matches: [ubuntu26.04, ubuntu-26.04, resolute]
+    eol: "2031-04"
+  
   - distro: debian
     version: "12"
     codename: bookworm
