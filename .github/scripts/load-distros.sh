@@ -105,3 +105,31 @@ with open('$CONFIG_FILE', 'r') as f:
 "
 }
 export -f get_architectures
+
+# Function to get match keywords (codename + matches) for a codename, one regex alternation
+get_match_regex() {
+    local codename="$1"
+    python3 -c "
+import yaml, re
+with open('$CONFIG_FILE', 'r') as f:
+    config = yaml.safe_load(f)
+    for d in config['distributions']:
+        if d['codename'] == '$codename':
+            words = [d['codename']] + list(d.get('matches', []))
+            print('|'.join(re.escape(w) for w in words))
+            break
+"
+}
+export -f get_match_regex
+
+# Function to list codenames of one distro type (ubuntu/debian)
+get_codenames_by_distro() {
+    local distro="$1"
+    python3 -c "
+import yaml
+with open('$CONFIG_FILE', 'r') as f:
+    config = yaml.safe_load(f)
+    print(' '.join(d['codename'] for d in config['distributions'] if d['distro'] == '$distro'))
+"
+}
+export -f get_codenames_by_distro

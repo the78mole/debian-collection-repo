@@ -17,14 +17,16 @@ if [ ! -d "$APT_REPO" ]; then
     exit 1
 fi
 
-# Define distribution mappings
-declare -A DIST_KEYWORDS
-DIST_KEYWORDS[jammy]="jammy|ubuntu22.04|ubuntu-22.04|22.04"
-DIST_KEYWORDS[noble]="noble|ubuntu24.04|ubuntu-24.04|24.04"
-DIST_KEYWORDS[bookworm]="bookworm|debian12|debian-12"
-DIST_KEYWORDS[trixie]="trixie|debian13|debian-13"
+# Load distributions and their match keywords from distros.yaml
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "$SCRIPT_DIR/load-distros.sh"
 
-DISTRIBUTIONS="jammy noble bookworm trixie"
+declare -A DIST_KEYWORDS
+for dist in $DISTRIBUTIONS; do
+    DIST_KEYWORDS[$dist]="$(get_match_regex "$dist")"
+done
+UBUNTU_DISTRIBUTIONS="$(get_codenames_by_distro ubuntu)"
+DEBIAN_DISTRIBUTIONS="$(get_codenames_by_distro debian)"
 
 echo "Organizing packages by distribution..."
 
@@ -50,9 +52,9 @@ detect_distribution() {
     # If no specific distribution detected, check for generic ubuntu/debian markers
     if [ -z "$detected_dists" ]; then
         if echo "$filename" | grep -qiE "ubuntu"; then
-            detected_dists="jammy noble"
+            detected_dists="$UBUNTU_DISTRIBUTIONS"
         elif echo "$filename" | grep -qiE "debian"; then
-            detected_dists="bookworm trixie"
+            detected_dists="$DEBIAN_DISTRIBUTIONS"
         fi
     fi
     
