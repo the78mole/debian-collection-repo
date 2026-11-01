@@ -17,7 +17,7 @@ permissions:
 
 jobs:
   generate-matrix:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     outputs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
     steps:
@@ -37,7 +37,7 @@ jobs:
           echo "matrix=$MATRIX" >> $GITHUB_OUTPUT
   
   generate-package-matrix:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     needs: generate-matrix
     outputs:
       package-matrix: ${{ steps.set-package-matrix.outputs.matrix }}
@@ -113,7 +113,7 @@ jobs:
           echo "matrix=$(echo "$MATRIX_JSON" | jq -c .)" >> $GITHUB_OUTPUT
   
   test-installation:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     needs: generate-package-matrix
     if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
     
@@ -183,7 +183,7 @@ jobs:
           fi
   
   summary:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     needs: test-installation
     if: always()
     
